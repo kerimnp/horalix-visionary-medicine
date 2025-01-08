@@ -13,6 +13,13 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <nav
       className={cn(
@@ -23,25 +30,38 @@ export function Navigation() {
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
         <div className="text-2xl font-bold text-medical-deep">Horalix</div>
         <div className="hidden md:flex items-center space-x-8">
-          <NavLink href="#features">Features</NavLink>
-          <NavLink href="#solutions">Solutions</NavLink>
-          <NavLink href="#about">About</NavLink>
-          <button className="premium-button">
+          <button
+            onClick={() => scrollToSection("features")}
+            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
+          >
+            Features
+          </button>
+          <button
+            onClick={() => scrollToSection("solutions")}
+            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
+          >
+            Solutions
+          </button>
+          <button
+            onClick={() => scrollToSection("pricing")}
+            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
+          >
+            Pricing
+          </button>
+          <button
+            onClick={() => scrollToSection("about")}
+            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
+          >
+            About
+          </button>
+          <button
+            onClick={() => scrollToSection("pricing")}
+            className="premium-button"
+          >
             Get Started
           </button>
         </div>
       </div>
     </nav>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
-    >
-      {children}
-    </a>
   );
 }
