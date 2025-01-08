@@ -30,9 +30,9 @@ export function Navigation() {
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <img 
-            src="/lovable-uploads/5811f467-a184-40d7-9535-e9cf6fb203c7.png" 
+            src="/lovable-uploads/a4f68104-c835-4dc9-b7bb-3b985fbb8253.png" 
             alt="Horalix Logo" 
-            className="h-12 w-auto animate-fade-in hover:scale-105 transition-transform duration-300"
+            className="h-8 md:h-10 w-auto animate-fade-in hover:scale-105 transition-transform duration-300"
           />
         </div>
         <div className="hidden md:flex items-center space-x-8">
