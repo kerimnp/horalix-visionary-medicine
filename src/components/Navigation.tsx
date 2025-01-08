@@ -23,44 +23,45 @@ export function Navigation() {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled ? "bg-white/80 backdrop-blur-lg shadow-sm" : "bg-transparent"
       )}
     >
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="text-2xl font-bold text-medical-deep">Horalix</div>
-        <div className="hidden md:flex items-center space-x-8">
-          <button
-            onClick={() => scrollToSection("features")}
-            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
-          >
-            Features
-          </button>
-          <button
-            onClick={() => scrollToSection("solutions")}
-            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
-          >
-            Solutions
-          </button>
-          <button
-            onClick={() => scrollToSection("pricing")}
-            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
-          >
-            Pricing
-          </button>
-          <button
-            onClick={() => scrollToSection("about")}
-            className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300"
-          >
-            About
-          </button>
-          <button
-            onClick={() => scrollToSection("pricing")}
-            className="premium-button"
-          >
-            Get Started
-          </button>
+        <div className="flex items-center space-x-2">
+          <img 
+            src="/lovable-uploads/5811f467-a184-40d7-9535-e9cf6fb203c7.png" 
+            alt="Horalix Logo" 
+            className="h-12 w-auto animate-fade-in hover:scale-105 transition-transform duration-300"
+          />
         </div>
+        <div className="hidden md:flex items-center space-x-8">
+          {[
+            ["features", "Features"],
+            ["solutions", "Solutions"],
+            ["pricing", "Pricing"],
+            ["about", "About"],
+            ["contact", "Contact"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => scrollToSection(id)}
+              className="text-medical-deep/80 hover:text-medical-deep transition-colors duration-300 relative group"
+            >
+              {label}
+              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-medical-electric transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => scrollToSection("pricing")}
+          className="premium-button group overflow-hidden"
+        >
+          <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+            Get Started
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-medical-electric to-medical-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+        </button>
       </div>
     </nav>
   );

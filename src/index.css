@@ -77,11 +77,11 @@
 }
 
 .glass-card {
-  @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-lg;
+  @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1;
 }
 
 .premium-button {
-  @apply relative overflow-hidden bg-medical-deep text-white px-8 py-3 rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+  @apply relative overflow-hidden bg-medical-deep text-white px-8 py-3 rounded-lg transition-all duration-500 hover:shadow-xl hover:-translate-y-0.5;
 }
 
 .premium-button::after {
@@ -95,4 +95,49 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.section-fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 1s ease-out;
+}
+
+.section-fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-hover-effect {
+  @apply transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:z-10;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-medical-deep to-medical-electric;
 }
