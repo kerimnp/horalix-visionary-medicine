@@ -14,7 +14,7 @@ export function Pricing() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {/* Innovator Package */}
-        <div className="glass-card p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-lg hover:shadow-xl border border-medical-electric/10">
+        <div className="bg-white/90 p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-lg hover:shadow-xl border border-medical-electric/10">
           <div className="flex flex-col justify-between h-full">
             <div>
               <div className="flex justify-between items-start mb-6">
@@ -49,7 +49,7 @@ export function Pricing() {
         </div>
 
         {/* Pioneer Package */}
-        <div className="glass-card p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-xl hover:shadow-2xl border-2 border-medical-electric/20 relative transform translate-y-[-1rem]">
+        <div className="bg-white/95 p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-xl hover:shadow-2xl border-2 border-medical-electric/20 relative transform translate-y-[-1rem]">
           <div className="absolute top-4 right-4 bg-medical-electric text-white text-sm px-3 py-1 rounded-full font-medium">
             Popular
           </div>
@@ -87,7 +87,7 @@ export function Pricing() {
         </div>
 
         {/* Enterprise Package */}
-        <div className="glass-card p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-lg hover:shadow-xl border border-medical-electric/10">
+        <div className="bg-white/90 p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-lg hover:shadow-xl border border-medical-electric/10">
           <div className="flex flex-col justify-between h-full">
             <div>
               <div className="flex justify-between items-start mb-6">
