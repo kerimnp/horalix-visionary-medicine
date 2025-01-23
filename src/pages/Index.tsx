@@ -6,9 +6,16 @@ import { About } from "@/components/About";
 import { Pricing } from "@/components/Pricing";
 import { Contact } from "@/components/Contact";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { useState } from "react";
 
 const Index = () => {
   useScrollAnimation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  if (isLoading) {
+    return <LoadingScreen onComplete={() => setIsLoading(false)} />;
+  }
 
   return (
     <main className="min-h-screen">
