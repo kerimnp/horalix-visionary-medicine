@@ -20,35 +20,36 @@ export const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
     >
       <div className="relative">
         <img 
-          src="/lovable-uploads/5b64343c-94ba-4c75-9597-91c77719092d.png" 
+          src="/lovable-uploads/1c97346c-b67d-4bee-ad7c-b1f8ebc5676e.png" 
           alt="HORALIX"
-          className="h-16 animate-fade-in relative z-10"
+          className="h-20 animate-fade-in relative z-10 brightness-200"
         />
-        {/* Primary glow layer */}
+        
+        {/* Core glow effect */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 blur-3xl animate-pulse-slow">
-            <div className="absolute inset-0 bg-medical-electric/30 rounded-full" />
+          <div className="absolute inset-0 blur-[50px] animate-pulse-slow">
+            <div className="absolute inset-0 bg-medical-electric/50 rounded-full" />
           </div>
         </div>
         
-        {/* Secondary glow layer */}
-        <div className="absolute inset-0 -z-20">
-          <div className="absolute inset-0 blur-2xl animate-float">
-            <div className="absolute inset-0 bg-medical-cyan/20 rounded-full" />
+        {/* Electric field effect */}
+        <div className="absolute -inset-4 -z-20">
+          <div className="absolute inset-0 blur-3xl animate-float">
+            <div className="absolute inset-0 bg-gradient-to-tr from-medical-electric/30 via-medical-cyan/20 to-medical-electric/30 rounded-full" />
           </div>
         </div>
         
-        {/* Outer energy ring */}
-        <div className="absolute -inset-4 -z-30">
-          <div className="absolute inset-0 blur-xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-medical-electric/10 via-medical-cyan/20 to-medical-electric/10 rounded-full animate-spin-slow" />
+        {/* Dynamic energy ring */}
+        <div className="absolute -inset-8 -z-30">
+          <div className="absolute inset-0 blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-medical-electric/20 via-medical-cyan/30 to-medical-electric/20 rounded-full animate-spin-slow" />
           </div>
         </div>
         
-        {/* Background pulse effect */}
-        <div className="absolute -inset-8 -z-40">
-          <div className="absolute inset-0 blur-3xl">
-            <div className="absolute inset-0 bg-gradient-to-tr from-medical-deep via-medical-electric/5 to-medical-cyan/10 rounded-full animate-pulse" />
+        {/* Outer pulse waves */}
+        <div className="absolute -inset-12 -z-40">
+          <div className="absolute inset-0 blur-[100px]">
+            <div className="absolute inset-0 bg-gradient-to-tr from-medical-deep via-medical-electric/10 to-medical-cyan/20 rounded-full animate-pulse" />
           </div>
         </div>
       </div>
