@@ -14,9 +14,14 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-white">
       <Helmet>
-        <title>Horalix - AI-Powered Medical Solutions | Visionary Healthcare Technology</title>
-        <meta name="description" content="Transform healthcare with Horalix's AI-powered medical solutions. Advanced diagnostics, real-time monitoring, and innovative healthcare technology for medical professionals." />
-        <meta name="keywords" content="healthcare AI, medical technology, patient care, healthcare solutions, medical diagnostics, AI diagnostics" />
+        <title>Horalix - Leading AI Medical Solutions in Bosnia | Advanced Healthcare Technology</title>
+        <meta name="description" content="Transform healthcare in Bosnia with Horalix's AI-powered medical solutions. Advanced diagnostics, real-time monitoring, and innovative healthcare technology for medical professionals in Bosnia and Herzegovina." />
+        <meta name="keywords" content="AI medicine Bosnia, healthcare technology Bosnia, medical AI solutions, Bosnian healthcare innovation, artificial intelligence healthcare, medical diagnostics Bosnia" />
+        <meta name="geo.region" content="BA" />
+        <meta name="geo.placename" content="Bosnia and Herzegovina" />
+        <link rel="alternate" hrefLang="bs" href="https://horalix.com/bs" />
+        <link rel="alternate" hrefLang="hr" href="https://horalix.com/hr" />
+        <link rel="alternate" hrefLang="sr" href="https://horalix.com/sr" />
       </Helmet>
 
       <Navigation />
