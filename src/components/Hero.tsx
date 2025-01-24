@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { ExternalLink } from "lucide-react";
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +38,7 @@ export function Hero() {
           </span>
           
           <h1 className="animate-fade-up opacity-0 [animation-delay:0.4s] text-5xl md:text-7xl font-bold text-medical-deep mb-6">
-            AI-Powered Medical Suite
+            AI-Powered<br />Medical Suite
           </h1>
           
           <p className="animate-fade-up opacity-0 [animation-delay:0.6s] text-xl text-medical-deep/60 mb-12">
@@ -45,10 +46,13 @@ export function Hero() {
           </p>
           
           <div className="animate-fade-up opacity-0 [animation-delay:0.8s] flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button onClick={scrollToPricing} className="premium-button">
+            <button onClick={scrollToPricing} className="w-full sm:w-auto bg-medical-deep text-white px-8 py-3 rounded-lg hover:bg-medical-deep/90 transition-all duration-300">
               Get Started
             </button>
-            <button className="px-8 py-3 rounded-lg border-2 border-medical-deep/10 text-medical-deep hover:bg-medical-deep/5 transition-colors duration-300">
+            <button className="w-full sm:w-auto bg-medical-electric text-white px-8 py-3 rounded-lg hover:bg-medical-electric/90 transition-all duration-300 flex items-center justify-center gap-2">
+              Try Demo <ExternalLink className="w-4 h-4" />
+            </button>
+            <button className="w-full sm:w-auto px-8 py-3 rounded-lg border-2 border-medical-deep/10 text-medical-deep hover:bg-medical-deep/5 transition-colors duration-300">
               Learn More
             </button>
           </div>
