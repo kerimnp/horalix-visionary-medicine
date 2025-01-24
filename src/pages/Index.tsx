@@ -8,6 +8,7 @@ import { Contact } from "@/components/Contact";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useState } from "react";
+import { Helmet } from "react-helmet";
 
 const Index = () => {
   useScrollAnimation();
@@ -19,6 +20,10 @@ const Index = () => {
 
   return (
     <main className="min-h-screen">
+      <Helmet>
+        <title>Horalix - AI-Powered Medical Solutions | Visionary Healthcare Technology</title>
+        <meta name="description" content="Transform healthcare with Horalix's AI-powered medical solutions. Advanced diagnostics, real-time monitoring, and innovative healthcare technology for medical professionals." />
+      </Helmet>
       <Navigation />
       <section id="hero" className="min-h-screen pt-20">
         <Hero />
