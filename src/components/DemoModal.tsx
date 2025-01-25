@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DemoModalProps {
   isOpen: boolean;
@@ -20,23 +21,16 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     e.preventDefault();
     
     try {
-      const response = await fetch(
-        "https://dctkidlofkgiiddfeehn.supabase.co/functions/v1/send-demo-email",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-          }),
-        }
-      );
+      const { error } = await supabase.functions.invoke('send-demo-email', {
+        body: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to send demo email");
+      if (error) {
+        throw error;
       }
 
       toast({
@@ -50,6 +44,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
       onClose();
       setFormData({ firstName: "", lastName: "", email: "", phone: "" });
     } catch (error) {
+      console.error("Error sending demo email:", error);
       toast({
         title: "Error",
         description: "There was an error processing your request. Please try again.",
