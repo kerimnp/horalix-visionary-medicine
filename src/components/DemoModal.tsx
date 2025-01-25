@@ -20,36 +20,32 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     e.preventDefault();
     
     try {
-      // Here you would typically send the data to your backend
-      // For now, we'll just show a success message
+      const response = await fetch(
+        "https://dctkidlofkgiiddfeehn.supabase.co/functions/v1/send-demo-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send demo email");
+      }
+
       toast({
         title: "Demo Request Received!",
         description: "We'll send you an email with the demo link shortly.",
       });
-      
-      // Email template with the demo link
-      const emailSubject = "Your Horalix Demo Access";
-      const emailBody = `
-Hello ${formData.firstName},
-
-I hope you're doing well. Thank you for expressing interest in Horalix AI Medical Suite. We're excited to show you how our platform can help streamline your processes and add value to your organization.
-
-You can access our demo at: antibiotikapp.netlify.com
-
-I'd be happy to schedule a personalized demo at your earliest convenience. Could you please let me know a few dates and times that work best for you? Once we settle on a time, I will send over a calendar invite with all the necessary details.
-
-In the meantime, feel free to let me know if there are any specific features or topics you would like us to focus on during the demo. We want to make sure the session is as relevant and helpful for you as possible.
-
-Thank you again for your interest. I look forward to hearing from you and demonstrating how Horalix can support your goals.
-
-Best regards,
-Horalix Team
-support@horalix.com
-      `;
 
       // Store the user data (you would typically do this in a database)
       console.log("Demo request data:", formData);
-      console.log("Email template:", { subject: emailSubject, body: emailBody });
 
       onClose();
       setFormData({ firstName: "", lastName: "", email: "", phone: "" });
