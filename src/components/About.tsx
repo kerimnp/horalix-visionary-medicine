@@ -1,21 +1,21 @@
-import { Award, Lightbulb, Brain } from "lucide-react";
+import { Brain, Shield, Cpu } from "lucide-react";
 
 export function About() {
   const stats = [
     {
       icon: Brain,
-      value: "99.9%",
-      label: "AI Accuracy in Testing",
+      value: "Advanced",
+      label: "Neural Networks",
     },
     {
-      icon: Lightbulb,
-      value: "5+",
-      label: "AI Models",
+      icon: Cpu,
+      value: "Real-time",
+      label: "Processing Engine",
     },
     {
-      icon: Award,
-      value: "24/7",
-      label: "Support Availability",
+      icon: Shield,
+      value: "HIPAA",
+      label: "Compliant System",
     },
   ];
 
@@ -26,7 +26,7 @@ export function About() {
           About Horalix
         </h2>
         <p className="text-xl text-medical-deep/60 max-w-2xl mx-auto">
-          Pioneering the future of healthcare with innovative AI solutions and a commitment to transforming medical diagnostics
+          Advancing healthcare through state-of-the-art artificial intelligence and machine learning technologies
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export function About() {
               <div className="w-16 h-16 rounded-full bg-medical-electric/10 flex items-center justify-center mb-4">
                 <stat.icon className="w-8 h-8 text-medical-electric" />
               </div>
-              <div className="text-3xl font-bold text-medical-deep mb-2">
+              <div className="text-2xl font-bold text-medical-deep mb-2">
                 {stat.value}
               </div>
               <div className="text-medical-deep/60">{stat.label}</div>
@@ -54,7 +54,7 @@ export function About() {
 
       <div className="mt-20 text-center">
         <p className="text-lg text-medical-deep/80 max-w-3xl mx-auto">
-          At Horalix, we're at the forefront of medical innovation, developing cutting-edge AI solutions that promise to revolutionize healthcare delivery. Our team of experts combines deep medical knowledge with advanced artificial intelligence to create tools that will enhance diagnostic accuracy and improve patient outcomes. We're committed to building a future where healthcare is more accurate, accessible, and efficient.
+          At Horalix, we're developing sophisticated artificial intelligence systems specifically designed for medical applications. Our proprietary neural networks and machine learning algorithms are built to process complex medical data with unprecedented accuracy. By leveraging cutting-edge technology and adhering to the highest security standards, we're creating a new paradigm in healthcare diagnostics and decision support systems.
         </p>
       </div>
     </div>
