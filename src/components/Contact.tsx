@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { toast } from "./ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -9,15 +10,40 @@ export function Contact() {
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the form data to your backend
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you as soon as possible.",
-    });
-    setFormData({ name: "", email: "", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            message: formData.message,
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent!",
+        description: "We'll get back to you as soon as possible.",
+      });
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem sending your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -32,6 +58,8 @@ export function Contact() {
       <form
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto space-y-6 glass-card p-8 rounded-xl"
+        itemScope
+        itemType="https://schema.org/ContactPage"
       >
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-medical-deep mb-2">
@@ -39,11 +67,14 @@ export function Contact() {
           </label>
           <Input
             id="name"
+            name="name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
             className="w-full"
             placeholder="Your name"
+            itemProp="name"
+            aria-label="Your name"
           />
         </div>
 
@@ -53,12 +84,15 @@ export function Contact() {
           </label>
           <Input
             id="email"
+            name="email"
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
             className="w-full"
             placeholder="your@email.com"
+            itemProp="email"
+            aria-label="Your email address"
           />
         </div>
 
@@ -68,16 +102,23 @@ export function Contact() {
           </label>
           <Textarea
             id="message"
+            name="message"
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             required
             className="w-full min-h-[150px]"
             placeholder="How can we help you?"
+            itemProp="description"
+            aria-label="Your message"
           />
         </div>
 
-        <button type="submit" className="premium-button w-full">
-          Send Message
+        <button 
+          type="submit" 
+          className="premium-button w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Sending..." : "Send Message"}
         </button>
       </form>
     </div>
