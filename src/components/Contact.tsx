@@ -19,11 +19,9 @@ export function Contact() {
     if (selectedPackage) {
       setFormData(prev => ({
         ...prev,
-        message: `I'm interested in the ${selectedPackage} Package. ${prev.message}`,
+        message: `I'm interested in the ${selectedPackage} Package.\n\nMy requirements are: `,
         package: selectedPackage
       }));
-      // Clear the sessionStorage after using it
-      sessionStorage.removeItem("selectedPackage");
     }
   }, []);
 
@@ -39,6 +37,7 @@ export function Contact() {
             name: formData.name,
             email: formData.email,
             message: formData.message,
+            package: formData.package // Store the package information
           }
         ]);
 
@@ -49,6 +48,8 @@ export function Contact() {
         description: "We'll get back to you as soon as possible.",
       });
       setFormData({ name: "", email: "", message: "", package: "" });
+      // Clear the sessionStorage after successful submission
+      sessionStorage.removeItem("selectedPackage");
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({

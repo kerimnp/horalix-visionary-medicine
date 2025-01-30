@@ -1,21 +1,21 @@
-import { Award, Users, Globe } from "lucide-react";
+import { Award, Lightbulb, Brain } from "lucide-react";
 
 export function About() {
   const stats = [
     {
-      icon: Users,
-      value: "10M+",
-      label: "Patients Served",
+      icon: Brain,
+      value: "99.9%",
+      label: "AI Accuracy in Testing",
     },
     {
-      icon: Globe,
-      value: "500+",
-      label: "Healthcare Providers",
+      icon: Lightbulb,
+      value: "5+",
+      label: "AI Models",
     },
     {
       icon: Award,
-      value: "99.9%",
-      label: "Accuracy Rate",
+      value: "24/7",
+      label: "Support Availability",
     },
   ];
 
@@ -26,7 +26,7 @@ export function About() {
           About Horalix
         </h2>
         <p className="text-xl text-medical-deep/60 max-w-2xl mx-auto">
-          Redefining healthcare with cutting-edge AI technology and unwavering commitment to medical excellence
+          Pioneering the future of healthcare with innovative AI solutions and a commitment to transforming medical diagnostics
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export function About() {
 
       <div className="mt-20 text-center">
         <p className="text-lg text-medical-deep/80 max-w-3xl mx-auto">
-          At Horalix, we combine advanced artificial intelligence with deep medical expertise to create solutions that transform healthcare delivery. Our commitment to innovation drives us to continuously evolve and improve, ensuring healthcare providers can offer the best possible care to their patients.
+          At Horalix, we're at the forefront of medical innovation, developing cutting-edge AI solutions that promise to revolutionize healthcare delivery. Our team of experts combines deep medical knowledge with advanced artificial intelligence to create tools that will enhance diagnostic accuracy and improve patient outcomes. We're committed to building a future where healthcare is more accurate, accessible, and efficient.
         </p>
       </div>
     </div>
