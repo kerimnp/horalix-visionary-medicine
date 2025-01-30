@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { toast } from "./ui/use-toast";
@@ -9,8 +9,23 @@ export function Contact() {
     name: "",
     email: "",
     message: "",
+    package: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Check if there's a selected package in sessionStorage
+    const selectedPackage = sessionStorage.getItem("selectedPackage");
+    if (selectedPackage) {
+      setFormData(prev => ({
+        ...prev,
+        message: `I'm interested in the ${selectedPackage} Package. ${prev.message}`,
+        package: selectedPackage
+      }));
+      // Clear the sessionStorage after using it
+      sessionStorage.removeItem("selectedPackage");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +48,7 @@ export function Contact() {
         title: "Message sent!",
         description: "We'll get back to you as soon as possible.",
       });
-      setFormData({ name: "", email: "", message: "" });
+      setFormData({ name: "", email: "", message: "", package: "" });
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -51,7 +66,9 @@ export function Contact() {
       <div className="text-center mb-16">
         <h2 className="text-4xl font-bold text-medical-deep mb-4">Contact Us</h2>
         <p className="text-xl text-medical-deep/60">
-          Get in touch with our team of experts
+          {formData.package 
+            ? `Tell us more about your needs for the ${formData.package} Package`
+            : "Get in touch with our team of experts"}
         </p>
       </div>
 

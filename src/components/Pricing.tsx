@@ -11,6 +11,9 @@ export function Pricing() {
     const element = document.getElementById("contact");
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
+      // Store the selected package in sessionStorage so the contact form can access it
+      sessionStorage.setItem("selectedPackage", selectedPackage);
+      setIsInquiryModalOpen(false);
     }
   };
 
@@ -31,7 +34,7 @@ export function Pricing() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {/* Basic Package */}
+        {/* Innovator Package */}
         <div className="bg-white/90 p-8 rounded-2xl hover:scale-[1.02] transition-all duration-500 shadow-lg hover:shadow-xl border border-medical-electric/10">
           <div className="flex flex-col justify-between h-full">
             <div>
