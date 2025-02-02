@@ -62,13 +62,13 @@ export function Contact() {
   };
 
   return (
-    <div className="container mx-auto px-6 py-20">
+    <div className="container mx-auto px-6 py-20" itemScope itemType="https://schema.org/ContactPage">
       <div className="text-center mb-16">
         <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium text-medical-electric bg-medical-electric/10 rounded-full">
           Get in Touch
         </span>
-        <h2 className="text-4xl font-bold text-medical-deep mb-4">Contact Us</h2>
-        <p className="text-xl text-medical-deep/60 max-w-2xl mx-auto">
+        <h2 className="text-4xl font-bold text-medical-deep mb-4" itemProp="name">Contact Us</h2>
+        <p className="text-xl text-medical-deep/60 max-w-2xl mx-auto" itemProp="description">
           {formData.package 
             ? `Tell us more about your needs for the ${formData.package} Package`
             : "Transform your healthcare facility with AI-powered solutions"}
@@ -79,7 +79,7 @@ export function Contact() {
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto space-y-8 glass-card p-8 rounded-xl"
         itemScope
-        itemType="https://schema.org/ContactPage"
+        itemType="https://schema.org/ContactForm"
       >
         <div className="space-y-2">
           <label htmlFor="name" className="block text-sm font-medium text-medical-deep">
@@ -147,13 +147,6 @@ export function Contact() {
             "Send Message"
           )}
         </button>
-
-        <p className="text-sm text-medical-deep/60 text-center mt-4">
-          By submitting this form, you agree to our{" "}
-          <a href="/privacy" className="text-medical-electric hover:underline">
-            Privacy Policy
-          </a>
-        </p>
       </form>
     </div>
   );
