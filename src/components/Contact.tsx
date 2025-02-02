@@ -3,6 +3,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { toast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -14,7 +15,6 @@ export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Check if there's a selected package in sessionStorage
     const selectedPackage = sessionStorage.getItem("selectedPackage");
     if (selectedPackage) {
       setFormData(prev => ({
@@ -37,24 +37,23 @@ export function Contact() {
             name: formData.name,
             email: formData.email,
             message: formData.message,
-            package: formData.package // Store the package information
+            package: formData.package
           }
         ]);
 
       if (error) throw error;
 
       toast({
-        title: "Message sent!",
-        description: "We'll get back to you as soon as possible.",
+        title: "Message sent successfully! 🎉",
+        description: "We'll get back to you within 24 hours.",
       });
       setFormData({ name: "", email: "", message: "", package: "" });
-      // Clear the sessionStorage after successful submission
       sessionStorage.removeItem("selectedPackage");
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "There was a problem sending your message. Please try again.",
+        title: "Error sending message",
+        description: "Please try again or contact us directly.",
         variant: "destructive",
       });
     } finally {
@@ -65,23 +64,26 @@ export function Contact() {
   return (
     <div className="container mx-auto px-6 py-20">
       <div className="text-center mb-16">
+        <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium text-medical-electric bg-medical-electric/10 rounded-full">
+          Get in Touch
+        </span>
         <h2 className="text-4xl font-bold text-medical-deep mb-4">Contact Us</h2>
-        <p className="text-xl text-medical-deep/60">
+        <p className="text-xl text-medical-deep/60 max-w-2xl mx-auto">
           {formData.package 
             ? `Tell us more about your needs for the ${formData.package} Package`
-            : "Get in touch with our team of experts"}
+            : "Transform your healthcare facility with AI-powered solutions"}
         </p>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="max-w-2xl mx-auto space-y-6 glass-card p-8 rounded-xl"
+        className="max-w-2xl mx-auto space-y-8 glass-card p-8 rounded-xl"
         itemScope
         itemType="https://schema.org/ContactPage"
       >
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-medical-deep mb-2">
-            Name
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-sm font-medium text-medical-deep">
+            Full Name
           </label>
           <Input
             id="name"
@@ -90,15 +92,15 @@ export function Contact() {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
             className="w-full"
-            placeholder="Your name"
+            placeholder="Dr. John Smith"
             itemProp="name"
-            aria-label="Your name"
+            aria-label="Your full name"
           />
         </div>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-medical-deep mb-2">
-            Email
+        <div className="space-y-2">
+          <label htmlFor="email" className="block text-sm font-medium text-medical-deep">
+            Professional Email
           </label>
           <Input
             id="email"
@@ -108,14 +110,14 @@ export function Contact() {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
             className="w-full"
-            placeholder="your@email.com"
+            placeholder="john.smith@hospital.com"
             itemProp="email"
-            aria-label="Your email address"
+            aria-label="Your professional email address"
           />
         </div>
 
-        <div>
-          <label htmlFor="message" className="block text-sm font-medium text-medical-deep mb-2">
+        <div className="space-y-2">
+          <label htmlFor="message" className="block text-sm font-medium text-medical-deep">
             Message
           </label>
           <Textarea
@@ -125,7 +127,7 @@ export function Contact() {
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             required
             className="w-full min-h-[150px]"
-            placeholder="How can we help you?"
+            placeholder="Tell us about your healthcare facility and requirements..."
             itemProp="description"
             aria-label="Your message"
           />
@@ -133,11 +135,25 @@ export function Contact() {
 
         <button 
           type="submit" 
-          className="premium-button w-full"
+          className="premium-button w-full group flex items-center justify-center gap-2"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Sending..." : "Send Message"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Send Message"
+          )}
         </button>
+
+        <p className="text-sm text-medical-deep/60 text-center mt-4">
+          By submitting this form, you agree to our{" "}
+          <a href="/privacy" className="text-medical-electric hover:underline">
+            Privacy Policy
+          </a>
+        </p>
       </form>
     </div>
   );
