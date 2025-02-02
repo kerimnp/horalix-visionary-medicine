@@ -113,7 +113,7 @@
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-medical-deep via-medical-electric to-medical-cyan animate-gradient;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-medical-deep via-medical-electric to-medical-cyan animate-gradient bg-[length:200%_auto];
 }
 
 .premium-card {

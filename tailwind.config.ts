@@ -86,6 +86,11 @@ export default {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        gradient: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -94,6 +99,7 @@ export default {
         "fade-up": "fade-up 0.5s ease-out forwards",
         "fade-in": "fade-in 0.5s ease-out forwards",
         "spin-slow": "spin-slow 8s linear infinite",
+        gradient: "gradient 3s ease infinite",
       },
     },
   },
