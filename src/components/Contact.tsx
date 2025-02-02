@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { toast } from "./ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -27,35 +27,32 @@ export function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { error } = await supabase
         .from('contact_submissions')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            message: formData.message,
-            package: formData.package
-          }
-        ]);
+        .insert([{
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          package: formData.package || null
+        }]);
 
       if (error) throw error;
 
-      toast({
-        title: "Message sent successfully! 🎉",
-        description: "We'll get back to you within 24 hours.",
-      });
+      toast.success("Message sent successfully! We'll get back to you within 24 hours.");
       setFormData({ name: "", email: "", message: "", package: "" });
       sessionStorage.removeItem("selectedPackage");
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast({
-        title: "Error sending message",
-        description: "Please try again or contact us directly.",
-        variant: "destructive",
-      });
+      toast.error("There was an error sending your message. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -83,7 +80,7 @@ export function Contact() {
       >
         <div className="space-y-2">
           <label htmlFor="name" className="block text-sm font-medium text-medical-deep">
-            Full Name
+            Full Name *
           </label>
           <Input
             id="name"
@@ -100,7 +97,7 @@ export function Contact() {
 
         <div className="space-y-2">
           <label htmlFor="email" className="block text-sm font-medium text-medical-deep">
-            Professional Email
+            Professional Email *
           </label>
           <Input
             id="email"
@@ -118,7 +115,7 @@ export function Contact() {
 
         <div className="space-y-2">
           <label htmlFor="message" className="block text-sm font-medium text-medical-deep">
-            Message
+            Message *
           </label>
           <Textarea
             id="message"
