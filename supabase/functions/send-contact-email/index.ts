@@ -25,11 +25,11 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message, package: selectedPackage }: ContactEmailRequest = await req.json();
 
-    // Send email to company
-    const companyEmailResponse = await resend.emails.send({
+    // Send notification email to owner
+    const ownerEmailResponse = await resend.emails.send({
       from: "Horalix Contact <onboarding@resend.dev>",
-      to: ["support@horalix.com"],
-      subject: `New Contact Form Submission${selectedPackage ? ` - ${selectedPackage} Package` : ''}`,
+      to: ["kerimsabic69@gmail.com"], // Owner's email
+      subject: `Nova Poruka sa Kontakt Forme${selectedPackage ? ` - ${selectedPackage} Paket` : ''}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -65,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
       reply_to: email
     });
 
-    // Also send confirmation email to the sender
+    // Send confirmation email to the sender
     const senderEmailResponse = await resend.emails.send({
       from: "Horalix <onboarding@resend.dev>",
       to: [email],
@@ -104,10 +104,10 @@ const handler = async (req: Request): Promise<Response> => {
       `
     });
 
-    console.log("Company email sent successfully:", companyEmailResponse);
-    console.log("Confirmation email sent successfully:", senderEmailResponse);
+    console.log("Owner notification email sent:", ownerEmailResponse);
+    console.log("Sender confirmation email sent:", senderEmailResponse);
 
-    return new Response(JSON.stringify({ companyEmailResponse, senderEmailResponse }), {
+    return new Response(JSON.stringify({ ownerEmailResponse, senderEmailResponse }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
