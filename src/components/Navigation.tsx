@@ -15,16 +15,15 @@ export function Navigation() {
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
-    const navHeight = 80; // Height of the navbar
-    const padding = 40; // Additional padding for visual comfort
-    
     if (element) {
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navHeight - padding;
-      
+      const offset = 100; // Increased offset for better spacing
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - offset;
+
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
+        // Adding a longer duration for smoother scrolling
       });
     }
   };
