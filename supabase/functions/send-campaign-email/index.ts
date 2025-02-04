@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,8 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
     // Fetch all active subscribers
     const { data: subscribers, error: fetchError } = await supabaseClient
@@ -54,55 +57,46 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log(`Sending campaign email to ${subscriber.email}...`);
         
-        const res = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-          },
-          body: JSON.stringify({
-            from: "Horalix <support@horalix.com>",
-            to: [subscriber.email],
-            subject: subject,
-            html: `
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
-                    .content { padding: 20px; background-color: #f9f9f9; }
-                    .footer { text-align: center; padding: 20px; color: #666; }
-                  </style>
-                </head>
-                <body>
-                  <div class="container">
-                    <div class="header">
-                      <h1>Horalix Newsletter</h1>
-                    </div>
-                    <div class="content">
-                      ${content}
-                    </div>
-                    <div class="footer">
-                      <p>You're receiving this email because you subscribed to our newsletter.</p>
-                      <p>To unsubscribe, please contact support.</p>
-                    </div>
+        const res = await resend.emails.send({
+          from: "Horalix <support@horalix.com>",
+          to: [subscriber.email],
+          subject: subject,
+          html: `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
+                  .content { padding: 20px; background-color: #f9f9f9; }
+                  .footer { text-align: center; padding: 20px; color: #666; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1>Horalix Newsletter</h1>
                   </div>
-                </body>
-              </html>
-            `,
-          }),
+                  <div class="content">
+                    ${content}
+                  </div>
+                  <div class="footer">
+                    <p>You're receiving this email because you subscribed to our newsletter.</p>
+                    <p>To unsubscribe, please contact support.</p>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `,
         });
 
-        const responseText = await res.text();
-        console.log(`Response for ${subscriber.email}:`, responseText);
-
-        if (!res.ok) {
-          throw new Error(`Failed to send email to ${subscriber.email}: ${responseText}`);
+        if (!res.id) {
+          throw new Error(`Failed to send email to ${subscriber.email}`);
         }
 
-        return { email: subscriber.email, status: 'success', response: responseText };
+        console.log(`Successfully sent email to ${subscriber.email} with ID: ${res.id}`);
+        return { email: subscriber.email, status: 'success', id: res.id };
       } catch (error) {
         console.error(`Error sending to ${subscriber.email}:`, error);
         return { email: subscriber.email, status: 'error', error: error.message };
@@ -134,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in campaign sending:", error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error.message || "Failed to send campaign emails",
         details: "Check the function logs for more information"
       }),
       {
