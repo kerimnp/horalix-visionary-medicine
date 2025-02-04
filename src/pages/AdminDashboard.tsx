@@ -6,7 +6,7 @@ import { ContactSubmissions } from "@/components/admin/ContactSubmissions";
 import { SubscribersList } from "@/components/admin/SubscribersList";
 import { EmailCampaigns } from "@/components/admin/EmailCampaigns";
 import { WebsiteAnalytics } from "@/components/admin/WebsiteAnalytics";
-import { Loader2 } from "lucide-react";
+import { UserManagement } from "@/components/admin/UserManagement";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -37,13 +37,18 @@ export default function AdminDashboard() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-medical-deep mb-8">Admin Dashboard</h1>
       
-      <Tabs defaultValue="submissions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="users" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="submissions">Contact Submissions</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
           <TabsTrigger value="campaigns">Email Campaigns</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="users">
+          <UserManagement />
+        </TabsContent>
 
         <TabsContent value="submissions">
           <ContactSubmissions />
