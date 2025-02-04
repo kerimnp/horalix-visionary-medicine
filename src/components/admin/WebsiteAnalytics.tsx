@@ -1,82 +1,102 @@
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users, Mail, MousePointerClick, UserPlus } from "lucide-react";
 
 async function fetchAnalytics() {
-  // Get total contact submissions
+  // Get unique contacts count
   const { count: contactCount } = await supabase
     .from('contact_submissions')
-    .select('*', { count: 'exact', head: true });
+    .select('email', { count: 'exact', head: true })
+    .order('created_at', { ascending: false });
+
+  // Get unique visitors count (last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const { data: uniqueVisitors } = await supabase
+    .from('site_visits')
+    .select('visitor_id')
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .order('created_at', { ascending: false });
+
+  const uniqueVisitorCount = new Set(uniqueVisitors?.map(v => v.visitor_id)).size;
 
   // Get total subscribers
   const { count: subscriberCount } = await supabase
     .from('subscribers')
     .select('*', { count: 'exact', head: true });
 
-  // Get total site visits
-  const { count: visitCount } = await supabase
-    .from('site_visits')
-    .select('*', { count: 'exact', head: true });
-
-  // Get monthly contact submissions and visits for the last 6 months
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-  const [{ data: monthlyContacts }, { data: monthlyVisits }] = await Promise.all([
-    supabase
-      .from('contact_submissions')
-      .select('created_at')
-      .gte('created_at', sixMonthsAgo.toISOString()),
+  // Get daily visits and contacts for the last 30 days
+  const [{ data: dailyVisits }, { data: dailyContacts }] = await Promise.all([
     supabase
       .from('site_visits')
       .select('created_at')
-      .gte('created_at', sixMonthsAgo.toISOString())
+      .gte('created_at', thirtyDaysAgo.toISOString()),
+    supabase
+      .from('contact_submissions')
+      .select('created_at')
+      .gte('created_at', thirtyDaysAgo.toISOString())
   ]);
 
   // Get page visits distribution
   const { data: pageVisits } = await supabase
     .from('site_visits')
-    .select('page_path');
+    .select('page_path')
+    .gte('created_at', thirtyDaysAgo.toISOString());
 
-  // Process monthly data
-  const processMonthlyData = (data: any[]) => {
-    return data?.reduce((acc: any, item) => {
-      const date = new Date(item.created_at);
-      const monthYear = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-      acc[monthYear] = (acc[monthYear] || 0) + 1;
-      return acc;
-    }, {});
-  };
+  // Process daily data
+  const dailyData = {};
+  const now = new Date();
+  
+  // Initialize all days in the last 30 days
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    dailyData[dateStr] = { date: dateStr, visits: 0, contacts: 0 };
+  }
 
-  const monthlyContactsData = processMonthlyData(monthlyContacts || []);
-  const monthlyVisitsData = processMonthlyData(monthlyVisits || []);
+  // Fill in actual data
+  dailyVisits?.forEach(visit => {
+    const date = new Date(visit.created_at).toISOString().split('T')[0];
+    if (dailyData[date]) {
+      dailyData[date].visits = (dailyData[date].visits || 0) + 1;
+    }
+  });
 
-  // Process page visits data
-  const pageVisitsData = pageVisits?.reduce((acc: any, item) => {
-    acc[item.page_path] = (acc[item.page_path] || 0) + 1;
+  dailyContacts?.forEach(contact => {
+    const date = new Date(contact.created_at).toISOString().split('T')[0];
+    if (dailyData[date]) {
+      dailyData[date].contacts = (dailyData[date].contacts || 0) + 1;
+    }
+  });
+
+  // Convert to array and sort by date
+  const timelineData = Object.values(dailyData).sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  // Process page distribution data
+  const pageDistribution = pageVisits?.reduce((acc, { page_path }) => {
+    const cleanPath = page_path === '/' ? 'Home' : page_path.replace('/', '').charAt(0).toUpperCase() + page_path.slice(2);
+    acc[cleanPath] = (acc[cleanPath] || 0) + 1;
     return acc;
   }, {});
 
-  const chartData = Object.entries(monthlyContactsData || {}).map(([name, contacts]) => ({
-    name,
-    contacts,
-    visits: monthlyVisitsData[name] || 0
-  }));
-
-  const pageDistributionData = Object.entries(pageVisitsData || {}).map(([name, value]) => ({
+  const pageDistributionData = Object.entries(pageDistribution || {}).map(([name, value]) => ({
     name,
     value
   }));
 
   return {
-    totalContacts: contactCount || 0,
+    uniqueContacts: contactCount || 0,
+    uniqueVisitors: uniqueVisitorCount || 0,
     totalSubscribers: subscriberCount || 0,
-    totalVisits: visitCount || 0,
-    monthlyData: chartData,
+    timelineData,
     pageDistribution: pageDistributionData
   };
 }
@@ -87,6 +107,7 @@ export function WebsiteAnalytics() {
   const { data, isLoading } = useQuery({
     queryKey: ['analytics'],
     queryFn: fetchAnalytics,
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   if (isLoading) {
@@ -97,67 +118,99 @@ export function WebsiteAnalytics() {
     );
   }
 
-  const conversionRate = data?.totalContacts && data.totalVisits 
-    ? ((data.totalContacts / data.totalVisits) * 100).toFixed(1) 
+  const conversionRate = data?.uniqueContacts && data.uniqueVisitors 
+    ? ((data.uniqueContacts / data.uniqueVisitors) * 100).toFixed(1) 
     : '0';
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-white/50 backdrop-blur-sm border-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
+            <CardTitle className="text-sm font-medium">Unique Visitors (30d)</CardTitle>
+            <Users className="h-4 w-4 text-medical-electric" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data?.totalVisits.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{data?.uniqueVisitors.toLocaleString()}</div>
+            <p className="text-xs text-gray-500">Unique visitors in the last 30 days</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-white/50 backdrop-blur-sm border-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Contacts</CardTitle>
+            <CardTitle className="text-sm font-medium">Unique Contacts</CardTitle>
+            <Mail className="h-4 w-4 text-medical-electric" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data?.totalContacts.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{data?.uniqueContacts.toLocaleString()}</div>
+            <p className="text-xs text-gray-500">Unique contact form submissions</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-white/50 backdrop-blur-sm border-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+            <MousePointerClick className="h-4 w-4 text-medical-electric" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{conversionRate}%</div>
+            <p className="text-xs text-gray-500">Visitors who submitted contact form</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-white/50 backdrop-blur-sm border-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Subscribers</CardTitle>
+            <CardTitle className="text-sm font-medium">Newsletter Subscribers</CardTitle>
+            <UserPlus className="h-4 w-4 text-medical-electric" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data?.totalSubscribers.toLocaleString()}</div>
+            <p className="text-xs text-gray-500">Total newsletter subscribers</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="monthly" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="monthly">Monthly Trends</TabsTrigger>
-          <TabsTrigger value="pages">Page Distribution</TabsTrigger>
+      <Tabs defaultValue="timeline" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="timeline">30 Day Timeline</TabsTrigger>
+          <TabsTrigger value="pages">Popular Pages</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="monthly">
+        <TabsContent value="timeline">
           <Card>
             <CardHeader>
-              <CardTitle>Monthly Trends</CardTitle>
+              <CardTitle>30 Day Activity Timeline</CardTitle>
+              <CardDescription>Daily visitors and contact form submissions</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data?.monthlyData || []}>
+                <LineChart data={data?.timelineData || []}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(date) => new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  />
                   <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="visits" stroke="#8884d8" name="Visits" />
-                  <Line type="monotone" dataKey="contacts" stroke="#82ca9d" name="Contacts" />
+                  <Tooltip 
+                    labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                    formatter={(value, name) => [value, name === 'visits' ? 'Page Views' : 'Contact Forms']}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="visits" 
+                    stroke="#8884d8" 
+                    name="Page Views"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="contacts" 
+                    stroke="#82ca9d" 
+                    name="Contact Forms"
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -167,7 +220,8 @@ export function WebsiteAnalytics() {
         <TabsContent value="pages">
           <Card>
             <CardHeader>
-              <CardTitle>Page Visit Distribution</CardTitle>
+              <CardTitle>Most Visited Pages</CardTitle>
+              <CardDescription>Distribution of page visits in the last 30 days</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
