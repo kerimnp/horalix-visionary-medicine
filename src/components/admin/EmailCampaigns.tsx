@@ -26,14 +26,21 @@ export function EmailCampaigns() {
         body: { subject, content }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message);
+      }
 
-      toast.success("Campaign sent successfully to all subscribers!");
+      if (!data) {
+        throw new Error('No response from server');
+      }
+
+      toast.success(data.message || "Campaign sent successfully to all subscribers!");
       setSubject("");
       setContent("");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending campaign:', error);
-      toast.error("Failed to send campaign. Please try again.");
+      toast.error(error.message || "Failed to send campaign. Please try again.");
     } finally {
       setIsSending(false);
     }
