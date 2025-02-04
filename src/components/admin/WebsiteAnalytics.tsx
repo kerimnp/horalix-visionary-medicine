@@ -6,7 +6,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Users, Mail, MousePointerClick, UserPlus } from "lucide-react";
 
-async function fetchAnalytics() {
+interface DailyData {
+  date: string;
+  visits: number;
+  contacts: number;
+}
+
+interface PageDistributionData {
+  name: string;
+  value: number;
+}
+
+interface AnalyticsData {
+  uniqueContacts: number;
+  uniqueVisitors: number;
+  totalSubscribers: number;
+  timelineData: DailyData[];
+  pageDistribution: PageDistributionData[];
+}
+
+async function fetchAnalytics(): Promise<AnalyticsData> {
   // Get unique contacts count
   const { count: contactCount } = await supabase
     .from('contact_submissions')
@@ -49,7 +68,7 @@ async function fetchAnalytics() {
     .gte('created_at', thirtyDaysAgo.toISOString());
 
   // Process daily data
-  const dailyData = {};
+  const dailyData: Record<string, DailyData> = {};
   const now = new Date();
   
   // Initialize all days in the last 30 days
@@ -81,7 +100,7 @@ async function fetchAnalytics() {
   );
 
   // Process page distribution data
-  const pageDistribution = pageVisits?.reduce((acc, { page_path }) => {
+  const pageDistribution = pageVisits?.reduce((acc: Record<string, number>, { page_path }) => {
     const cleanPath = page_path === '/' ? 'Home' : page_path.replace('/', '').charAt(0).toUpperCase() + page_path.slice(2);
     acc[cleanPath] = (acc[cleanPath] || 0) + 1;
     return acc;
@@ -104,7 +123,7 @@ async function fetchAnalytics() {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export function WebsiteAnalytics() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<AnalyticsData>({
     queryKey: ['analytics'],
     queryFn: fetchAnalytics,
     refetchInterval: 30000, // Refresh every 30 seconds
