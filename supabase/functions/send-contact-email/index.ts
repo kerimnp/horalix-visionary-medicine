@@ -25,10 +25,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message, package: selectedPackage }: ContactEmailRequest = await req.json();
 
-    // Send notification email to owner
+    // Send notification email to both addresses
     const ownerEmailResponse = await resend.emails.send({
       from: "Horalix Contact <onboarding@resend.dev>",
-      to: ["kerimsabic69@gmail.com"], // Owner's email
+      to: ["support@horalix.com", "kerimsabic69@gmail.com"], // Send to both addresses
       subject: `Nova Poruka sa Kontakt Forme${selectedPackage ? ` - ${selectedPackage} Paket` : ''}`,
       html: `
         <!DOCTYPE html>
