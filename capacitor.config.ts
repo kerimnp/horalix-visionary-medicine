@@ -8,8 +8,14 @@ const config: CapacitorConfig = {
     url: 'https://dctkidlofkgiiddfeehn.lovableproject.com?forceHideBadge=true',
     cleartext: true
   },
-  ios: {
-    contentInset: 'automatic'
+  android: {
+    buildOptions: {
+      keystorePath: 'release-key.keystore',
+      keystoreAlias: 'horalix',
+      keystorePassword: 'your_keystore_password',
+      storePassword: 'your_store_password',
+      releaseType: 'APK'
+    }
   }
 };
 
