@@ -18,7 +18,6 @@ interface ContactEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -26,10 +25,13 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message, package: selectedPackage, subscribe }: ContactEmailRequest = await req.json();
 
+    // For testing, we'll send all emails to your verified email
+    const testEmail = "kerim.sabic@gmail.com";
+
     // Send notification to owner
     const ownerEmailResponse = await resend.emails.send({
       from: "Horalix Contact <onboarding@resend.dev>",
-      to: ["support@horalix.com"],
+      to: [testEmail],
       subject: `Nova Poruka sa Kontakt Forme${selectedPackage ? ` - ${selectedPackage} Paket` : ''}`,
       html: `
         <!DOCTYPE html>
@@ -72,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation to sender
     const senderEmailResponse = await resend.emails.send({
       from: "Horalix <onboarding@resend.dev>",
-      to: [email],
+      to: [testEmail],
       subject: "Hvala na poruci | Thank you for contacting Horalix",
       html: `
         <!DOCTYPE html>

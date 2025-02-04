@@ -22,9 +22,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, type }: WelcomeEmailRequest = await req.json();
+    const { name, type }: WelcomeEmailRequest = await req.json();
+    
+    // For testing, we'll send all emails to your verified email
+    const testEmail = "kerim.sabic@gmail.com";
 
-    console.log(`Sending welcome email to ${email} (${type})`);
+    console.log(`Sending welcome email to ${testEmail} (${type})`);
 
     let subject, content;
     switch (type) {
@@ -65,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResult = await resend.emails.send({
       from: "Horalix <onboarding@resend.dev>",
-      to: email,
+      to: [testEmail],
       subject: subject,
       html: content,
     });

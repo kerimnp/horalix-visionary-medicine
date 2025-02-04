@@ -15,13 +15,15 @@ interface EmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { firstName, lastName, email }: EmailRequest = await req.json();
+    const { firstName, lastName }: EmailRequest = await req.json();
+    
+    // For testing, we'll send all emails to your verified email
+    const testEmail = "kerim.sabic@gmail.com";
 
     const emailSubject = "Your Horalix Demo Access";
     const emailBody = `
@@ -50,7 +52,7 @@ support@horalix.com
       },
       body: JSON.stringify({
         from: "Horalix <onboarding@resend.dev>",
-        to: [email],
+        to: [testEmail],
         subject: emailSubject,
         html: emailBody.replace(/\n/g, "<br>"),
       }),
