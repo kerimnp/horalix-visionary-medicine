@@ -6,6 +6,7 @@ import { ContactSubmissions } from "@/components/admin/ContactSubmissions";
 import { SubscribersList } from "@/components/admin/SubscribersList";
 import { EmailCampaigns } from "@/components/admin/EmailCampaigns";
 import { WebsiteAnalytics } from "@/components/admin/WebsiteAnalytics";
+import { Loader2 } from "lucide-react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
