@@ -52,28 +52,47 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending campaign to ${subscribers.length} subscribers`);
 
-    // Send emails to all subscribers
-    const emailPromises = subscribers.map(subscriber => 
-      resend.emails.send({
-        from: "Horalix <onboarding@resend.dev>",
-        to: subscriber.email,
-        subject: subject,
-        html: `
-          <h1>Hello ${subscriber.name}!</h1>
-          ${content}
-          <p style="margin-top: 20px; font-size: 12px; color: #666;">
-            To unsubscribe, please contact support.
-          </p>
-        `,
-      })
-    );
+    // Send emails to all subscribers one by one to ensure delivery
+    const emailResults = [];
+    for (const subscriber of subscribers) {
+      try {
+        const emailResult = await resend.emails.send({
+          from: "Horalix <onboarding@resend.dev>",
+          to: subscriber.email,
+          subject: subject,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Hello ${subscriber.name}!</h2>
+              ${content}
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                <p>You're receiving this email because you subscribed to our newsletter.</p>
+                <p>To unsubscribe, please contact support.</p>
+              </div>
+            </div>
+          `,
+        });
+        
+        console.log(`Email sent successfully to ${subscriber.email}:`, emailResult);
+        emailResults.push({ email: subscriber.email, status: 'success', result: emailResult });
+      } catch (error) {
+        console.error(`Error sending email to ${subscriber.email}:`, error);
+        emailResults.push({ email: subscriber.email, status: 'error', error: error.message });
+      }
+      
+      // Add a small delay between emails to prevent rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
 
-    await Promise.all(emailPromises);
+    const successCount = emailResults.filter(r => r.status === 'success').length;
+    const failureCount = emailResults.filter(r => r.status === 'error').length;
 
-    console.log("Campaign sent successfully to all subscribers");
+    console.log(`Campaign completed. Success: ${successCount}, Failures: ${failureCount}`);
 
     return new Response(
-      JSON.stringify({ message: "Campaign sent successfully" }),
+      JSON.stringify({ 
+        message: `Campaign sent successfully to ${successCount} subscribers${failureCount > 0 ? `, ${failureCount} failed` : ''}`,
+        results: emailResults 
+      }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
