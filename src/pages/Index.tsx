@@ -7,9 +7,33 @@ import { Pricing } from "@/components/Pricing";
 import { Contact } from "@/components/Contact";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Helmet } from "react-helmet";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from 'uuid';
 
 const Index = () => {
   useScrollAnimation();
+
+  useEffect(() => {
+    const trackPageVisit = async () => {
+      // Get or create visitor ID from localStorage
+      let visitorId = localStorage.getItem('visitor_id');
+      if (!visitorId) {
+        visitorId = uuidv4();
+        localStorage.setItem('visitor_id', visitorId);
+      }
+
+      // Log the page visit
+      await supabase.from('site_visits').insert({
+        page_path: window.location.pathname,
+        visitor_id: visitorId,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null,
+      });
+    };
+
+    trackPageVisit();
+  }, []);
 
   return (
     <main className="min-h-screen bg-white">
