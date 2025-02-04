@@ -14,6 +14,7 @@ interface ContactEmailRequest {
   email: string;
   message: string;
   package?: string;
+  subscribe?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -23,9 +24,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, message, package: selectedPackage }: ContactEmailRequest = await req.json();
+    const { name, email, message, package: selectedPackage, subscribe }: ContactEmailRequest = await req.json();
 
-    // First, send notification email to owner
+    // Send notification to owner
     const ownerEmailResponse = await resend.emails.send({
       from: "Horalix Contact <onboarding@resend.dev>",
       to: ["support@horalix.com"],
@@ -52,6 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <p><strong>Ime:</strong> ${name}</p>
                 <p><strong>Email:</strong> ${email}</p>
                 ${selectedPackage ? `<p><strong>Paket:</strong> ${selectedPackage}</p>` : ''}
+                ${subscribe ? `<p><strong>Pretplata:</strong> Da</p>` : ''}
                 <h2>Poruka:</h2>
                 <p>${message.replace(/\n/g, '<br>')}</p>
               </div>
@@ -67,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Owner notification email sent:", ownerEmailResponse);
 
-    // Then, send confirmation email to the sender
+    // Send confirmation to sender
     const senderEmailResponse = await resend.emails.send({
       from: "Horalix <onboarding@resend.dev>",
       to: [email],
@@ -92,9 +94,11 @@ const handler = async (req: Request): Promise<Response> => {
               <div class="content">
                 <p>Poštovani/a ${name},</p>
                 <p>Hvala vam što ste nas kontaktirali. Naš tim će pregledati vašu poruku i javiti vam se u najkraćem mogućem roku.</p>
+                ${subscribe ? '<p>Hvala vam što ste se pretplatili na naš newsletter!</p>' : ''}
                 <br>
                 <p>Dear ${name},</p>
                 <p>Thank you for contacting us. Our team will review your message and get back to you as soon as possible.</p>
+                ${subscribe ? '<p>Thank you for subscribing to our newsletter!</p>' : ''}
               </div>
               <div class="footer">
                 <p>Horalix - Vodeća AI Healthcare Tehnologija u Bosni</p>

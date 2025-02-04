@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { Checkbox } from "./ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -11,6 +12,7 @@ export function Contact() {
     email: "",
     message: "",
     package: "",
+    subscribe: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,7 +24,6 @@ export function Contact() {
         message: `I'm interested in the ${selectedPackage} Package.\n\nMy requirements are: `,
         package: selectedPackage
       }));
-      // Clear the session storage after getting the value
       sessionStorage.removeItem("selectedPackage");
     }
   }, []);
@@ -38,7 +39,7 @@ export function Contact() {
     setIsSubmitting(true);
 
     try {
-      // First, save to database
+      // First, save contact submission to database
       const { error: dbError } = await supabase
         .from('contact_submissions')
         .insert([{
@@ -53,13 +54,29 @@ export function Contact() {
         throw dbError;
       }
 
-      // Then, send email
+      // If user wants to subscribe, add them to subscribers
+      if (formData.subscribe) {
+        const { error: subscribeError } = await supabase
+          .from('subscribers')
+          .insert([{
+            name: formData.name,
+            email: formData.email
+          }]);
+
+        if (subscribeError && !subscribeError.message.includes('unique constraint')) {
+          console.error('Subscription error:', subscribeError);
+          throw subscribeError;
+        }
+      }
+
+      // Send email notifications
       const { error: emailError } = await supabase.functions.invoke('send-contact-email', {
         body: {
           name: formData.name,
           email: formData.email,
           message: formData.message,
-          package: formData.package
+          package: formData.package,
+          subscribe: formData.subscribe
         }
       });
 
@@ -69,7 +86,7 @@ export function Contact() {
       }
 
       toast.success("Message sent successfully! We'll get back to you within 24 hours.");
-      setFormData({ name: "", email: "", message: "", package: "" });
+      setFormData({ name: "", email: "", message: "", package: "", subscribe: false });
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error("There was an error sending your message. Please try again.");
@@ -148,6 +165,22 @@ export function Contact() {
             itemProp="description"
             aria-label="Your message"
           />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="subscribe"
+            checked={formData.subscribe}
+            onCheckedChange={(checked) => 
+              setFormData({ ...formData, subscribe: checked as boolean })
+            }
+          />
+          <label
+            htmlFor="subscribe"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Subscribe to our newsletter for updates and events
+          </label>
         </div>
 
         <button 
