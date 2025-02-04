@@ -1,8 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,44 +24,57 @@ const handler = async (req: Request): Promise<Response> => {
     const testEmail = "kerim.sabic@gmail.com";
     
     console.log(`Sending test email to ${testEmail}...`);
-    const emailResult = await resend.emails.send({
-      from: "Horalix <onboarding@resend.dev>",
-      to: [testEmail],
-      subject: subject,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
-              .content { padding: 20px; background-color: #f9f9f9; }
-              .footer { text-align: center; padding: 20px; color: #666; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>Horalix Newsletter</h1>
-              </div>
-              <div class="content">
-                ${content}
-              </div>
-              <div class="footer">
-                <p>You're receiving this email because you subscribed to our newsletter.</p>
-                <p>To unsubscribe, please contact support.</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `,
-    });
     
-    console.log("Email sent successfully:", emailResult);
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+      },
+      body: JSON.stringify({
+        from: "Horalix <onboarding@resend.dev>",
+        to: [testEmail],
+        subject: subject,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .footer { text-align: center; padding: 20px; color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Horalix Newsletter</h1>
+                </div>
+                <div class="content">
+                  ${content}
+                </div>
+                <div class="footer">
+                  <p>You're receiving this email because you subscribed to our newsletter.</p>
+                  <p>To unsubscribe, please contact support.</p>
+                </div>
+              </div>
+            </body>
+          </html>
+        `,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to send email: ${await res.text()}`);
+    }
+
+    const data = await res.json();
+    console.log("Email sent successfully:", data);
 
     return new Response(
-      JSON.stringify({ message: "Campaign sent successfully for testing", result: emailResult }),
+      JSON.stringify({ message: "Campaign sent successfully for testing", result: data }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },

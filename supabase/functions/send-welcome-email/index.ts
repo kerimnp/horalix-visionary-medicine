@@ -1,13 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface WelcomeEmailRequest {
@@ -66,14 +61,26 @@ const handler = async (req: Request): Promise<Response> => {
         break;
     }
 
-    const emailResult = await resend.emails.send({
-      from: "Horalix <onboarding@resend.dev>",
-      to: [testEmail],
-      subject: subject,
-      html: content,
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+      },
+      body: JSON.stringify({
+        from: "Horalix <onboarding@resend.dev>",
+        to: [testEmail],
+        subject: subject,
+        html: content,
+      }),
     });
 
-    console.log("Welcome email sent successfully:", emailResult);
+    if (!res.ok) {
+      throw new Error(`Failed to send email: ${await res.text()}`);
+    }
+
+    const data = await res.json();
+    console.log("Welcome email sent successfully:", data);
 
     return new Response(
       JSON.stringify({ message: "Welcome email sent successfully" }),
@@ -82,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending welcome email:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
