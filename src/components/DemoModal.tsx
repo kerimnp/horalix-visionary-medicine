@@ -21,7 +21,8 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     e.preventDefault();
     
     try {
-      const { error } = await supabase.functions.invoke('send-demo-email', {
+      // Send demo request email
+      const { error: demoError } = await supabase.functions.invoke('send-demo-email', {
         body: {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -29,17 +30,28 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
         },
       });
 
-      if (error) {
-        throw error;
+      if (demoError) {
+        throw demoError;
+      }
+
+      // Send welcome email
+      const { error: welcomeError } = await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          type: 'demo'
+        },
+      });
+
+      if (welcomeError) {
+        console.error('Welcome email error:', welcomeError);
+        // Don't throw here as the main submission was successful
       }
 
       toast({
         title: "Demo Request Received!",
         description: "We'll send you an email with the demo link shortly.",
       });
-
-      // Store the user data (you would typically do this in a database)
-      console.log("Demo request data:", formData);
 
       onClose();
       setFormData({ firstName: "", lastName: "", email: "", phone: "" });

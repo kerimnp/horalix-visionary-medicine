@@ -69,7 +69,37 @@ export function Contact() {
         }
       }
 
-      // Send email notifications
+      // Send welcome email
+      const { error: welcomeError } = await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          type: 'contact'
+        },
+      });
+
+      if (welcomeError) {
+        console.error('Welcome email error:', welcomeError);
+        throw welcomeError;
+      }
+
+      // If subscribed, send subscriber welcome email
+      if (formData.subscribe) {
+        const { error: subscriberWelcomeError } = await supabase.functions.invoke('send-welcome-email', {
+          body: {
+            name: formData.name,
+            email: formData.email,
+            type: 'subscriber'
+          },
+        });
+
+        if (subscriberWelcomeError) {
+          console.error('Subscriber welcome email error:', subscriberWelcomeError);
+          // Don't throw here as the main submission was successful
+        }
+      }
+
+      // Send notification email to admin
       const { error: emailError } = await supabase.functions.invoke('send-contact-email', {
         body: {
           name: formData.name,
