@@ -25,52 +25,89 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message, package: selectedPackage }: ContactEmailRequest = await req.json();
 
-    // Format the email HTML with a professional template
-    const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background-color: #f9f9f9; }
-            .footer { text-align: center; padding: 20px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>New Contact Form Submission</h1>
-            </div>
-            <div class="content">
-              <h2>Contact Details:</h2>
-              <p><strong>Name:</strong> ${name}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              ${selectedPackage ? `<p><strong>Package:</strong> ${selectedPackage}</p>` : ''}
-              <h2>Message:</h2>
-              <p>${message.replace(/\n/g, '<br>')}</p>
-            </div>
-            <div class="footer">
-              <p>This message was sent via the Horalix contact form.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-
     // Send email to company
-    const emailResponse = await resend.emails.send({
-      from: "Horalix <onboarding@resend.dev>",
+    const companyEmailResponse = await resend.emails.send({
+      from: "Horalix Contact <onboarding@resend.dev>",
       to: ["support@horalix.com"],
       subject: `New Contact Form Submission${selectedPackage ? ` - ${selectedPackage} Package` : ''}`,
-      html: emailHtml,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
+              .content { padding: 20px; background-color: #f9f9f9; }
+              .footer { text-align: center; padding: 20px; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Nova Poruka sa Kontakt Forme</h1>
+              </div>
+              <div class="content">
+                <h2>Detalji Kontakta:</h2>
+                <p><strong>Ime:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                ${selectedPackage ? `<p><strong>Paket:</strong> ${selectedPackage}</p>` : ''}
+                <h2>Poruka:</h2>
+                <p>${message.replace(/\n/g, '<br>')}</p>
+              </div>
+              <div class="footer">
+                <p>Ova poruka je poslana preko Horalix kontakt forme.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
       reply_to: email
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    // Also send confirmation email to the sender
+    const senderEmailResponse = await resend.emails.send({
+      from: "Horalix <onboarding@resend.dev>",
+      to: [email],
+      subject: "Hvala na poruci | Thank you for contacting Horalix",
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
+              .content { padding: 20px; background-color: #f9f9f9; }
+              .footer { text-align: center; padding: 20px; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Hvala na poruci!</h1>
+              </div>
+              <div class="content">
+                <p>Poštovani/a ${name},</p>
+                <p>Hvala vam što ste nas kontaktirali. Naš tim će pregledati vašu poruku i javiti vam se u najkraćem mogućem roku.</p>
+                <br>
+                <p>Dear ${name},</p>
+                <p>Thank you for contacting us. Our team will review your message and get back to you as soon as possible.</p>
+              </div>
+              <div class="footer">
+                <p>Horalix - Vodeća AI Healthcare Tehnologija u Bosni</p>
+                <p>Leading AI Healthcare Technology in Bosnia</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+    });
 
-    return new Response(JSON.stringify(emailResponse), {
+    console.log("Company email sent successfully:", companyEmailResponse);
+    console.log("Confirmation email sent successfully:", senderEmailResponse);
+
+    return new Response(JSON.stringify({ companyEmailResponse, senderEmailResponse }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
