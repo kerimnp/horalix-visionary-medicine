@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
       },
       body: JSON.stringify({
-        from: "Horalix Welcome <welcome@horalix.com>",
+        from: "Horalix <support@horalix.com>",
         to: [testEmail],
         subject: subject,
         html: content,

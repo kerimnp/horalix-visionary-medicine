@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
       },
       body: JSON.stringify({
-        from: "Horalix Contact <contact@horalix.com>",
+        from: "Horalix <support@horalix.com>",
         to: [testEmail],
         subject: `Nova Poruka sa Kontakt Forme${selectedPackage ? ` - ${selectedPackage} Paket` : ''}`,
         html: `
@@ -86,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
       },
       body: JSON.stringify({
-        from: "Horalix <noreply@horalix.com>",
+        from: "Horalix <support@horalix.com>",
         to: [testEmail],
         subject: "Hvala na poruci | Thank you for contacting Horalix",
         html: `
