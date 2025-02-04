@@ -11,6 +11,9 @@ import {
 import { format } from "date-fns";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { Database } from "@/integrations/supabase/types";
+
+type AdminActivity = Database['public']['Tables']['admin_activities']['Row'];
 
 export function ActivityLog() {
   const { data: activities, isLoading } = useQuery({
@@ -23,7 +26,7 @@ export function ActivityLog() {
         .limit(50);
 
       if (error) throw error;
-      return data;
+      return data as AdminActivity[];
     },
   });
 
