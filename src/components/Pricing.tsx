@@ -8,14 +8,12 @@ export function Pricing() {
   const [selectedPackage, setSelectedPackage] = useState<string>("");
 
   const scrollToContact = () => {
+    sessionStorage.setItem("selectedPackage", selectedPackage);
     const contactElement = document.getElementById("contact");
     if (contactElement) {
-      sessionStorage.setItem("selectedPackage", selectedPackage);
       contactElement.scrollIntoView({ behavior: "smooth" });
-      // Reload the page to trigger the useEffect in Contact component
-      window.location.reload();
-      setIsInquiryModalOpen(false);
     }
+    setIsInquiryModalOpen(false);
   };
 
   const handleInquiry = (packageName: string) => {

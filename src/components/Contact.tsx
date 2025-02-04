@@ -22,6 +22,8 @@ export function Contact() {
         message: `I'm interested in the ${selectedPackage} Package.\n\nMy requirements are: `,
         package: selectedPackage
       }));
+      // Clear the session storage after getting the value
+      sessionStorage.removeItem("selectedPackage");
     }
   }, []);
 
@@ -36,7 +38,8 @@ export function Contact() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // First, save to database
+      const { error: dbError } = await supabase
         .from('contact_submissions')
         .insert([{
           name: formData.name,
@@ -45,14 +48,28 @@ export function Contact() {
           package: formData.package || null
         }]);
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (dbError) {
+        console.error('Supabase error:', dbError);
+        throw dbError;
+      }
+
+      // Then, send email
+      const { error: emailError } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          package: formData.package
+        }
+      });
+
+      if (emailError) {
+        console.error('Email sending error:', emailError);
+        throw emailError;
       }
 
       toast.success("Message sent successfully! We'll get back to you within 24 hours.");
       setFormData({ name: "", email: "", message: "", package: "" });
-      sessionStorage.removeItem("selectedPackage");
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error("There was an error sending your message. Please try again.");
@@ -62,7 +79,7 @@ export function Contact() {
   };
 
   return (
-    <div className="container mx-auto px-6 py-20" itemScope itemType="https://schema.org/ContactPage">
+    <div className="container mx-auto px-6 py-20" id="contact" itemScope itemType="https://schema.org/ContactPage">
       <div className="text-center mb-16">
         <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium text-medical-electric bg-medical-electric/10 rounded-full">
           Get in Touch
