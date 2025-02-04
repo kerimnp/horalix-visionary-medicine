@@ -7,6 +7,7 @@ import { SubscribersList } from "@/components/admin/SubscribersList";
 import { EmailCampaigns } from "@/components/admin/EmailCampaigns";
 import { WebsiteAnalytics } from "@/components/admin/WebsiteAnalytics";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { ActivityLog } from "@/components/admin/ActivityLog";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -38,12 +39,13 @@ export default function AdminDashboard() {
       <h1 className="text-3xl font-bold text-medical-deep mb-8">Admin Dashboard</h1>
       
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="submissions">Contact Submissions</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
           <TabsTrigger value="campaigns">Email Campaigns</TabsTrigger>
+          <TabsTrigger value="activity">Activity Log</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -64,6 +66,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="campaigns">
           <EmailCampaigns />
+        </TabsContent>
+
+        <TabsContent value="activity">
+          <ActivityLog />
         </TabsContent>
       </Tabs>
     </div>
