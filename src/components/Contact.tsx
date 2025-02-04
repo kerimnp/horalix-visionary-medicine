@@ -45,7 +45,10 @@ export function Contact() {
           package: formData.package || null
         }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       toast.success("Message sent successfully! We'll get back to you within 24 hours.");
       setFormData({ name: "", email: "", message: "", package: "" });
