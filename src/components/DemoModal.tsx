@@ -16,11 +16,14 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     email: "",
     phone: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
+      console.log('Sending demo request email...');
       // Send demo request email
       const { error: demoError } = await supabase.functions.invoke('send-demo-email', {
         body: {
@@ -31,9 +34,11 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
       });
 
       if (demoError) {
+        console.error('Demo email error:', demoError);
         throw demoError;
       }
 
+      console.log('Sending welcome email...');
       // Send welcome email
       const { error: welcomeError } = await supabase.functions.invoke('send-welcome-email', {
         body: {
@@ -45,7 +50,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
 
       if (welcomeError) {
         console.error('Welcome email error:', welcomeError);
-        // Don't throw here as the main submission was successful
+        throw welcomeError;
       }
 
       toast({
@@ -56,12 +61,14 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
       onClose();
       setFormData({ firstName: "", lastName: "", email: "", phone: "" });
     } catch (error) {
-      console.error("Error sending demo email:", error);
+      console.error("Error processing demo request:", error);
       toast({
         title: "Error",
         description: "There was an error processing your request. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -83,6 +90,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               required
               className="w-full"
               placeholder="John"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -96,6 +104,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               required
               className="w-full"
               placeholder="Doe"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -110,6 +119,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               required
               className="w-full"
               placeholder="john@example.com"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -124,10 +134,15 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               required
               className="w-full"
               placeholder="+1234567890"
+              disabled={isSubmitting}
             />
           </div>
-          <button type="submit" className="w-full premium-button">
-            Request Demo
+          <button 
+            type="submit" 
+            className="w-full premium-button disabled:opacity-50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Sending..." : "Request Demo"}
           </button>
         </form>
       </DialogContent>

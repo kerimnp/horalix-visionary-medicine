@@ -21,6 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Starting campaign email send process...");
     const { subject, content }: CampaignEmailRequest = await req.json();
 
     // Create Supabase client
@@ -30,6 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Fetch all active subscribers
+    console.log("Fetching active subscribers...");
     const { data: subscribers, error: fetchError } = await supabaseClient
       .from('subscribers')
       .select('email, name')
@@ -41,6 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!subscribers || subscribers.length === 0) {
+      console.log("No active subscribers found");
       return new Response(
         JSON.stringify({ message: "No active subscribers found" }),
         {
@@ -50,37 +53,56 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Sending campaign to ${subscribers.length} subscribers`);
+    console.log(`Found ${subscribers.length} active subscribers`);
 
-    // Send emails to all subscribers one by one to ensure delivery
+    // Send emails to all subscribers one by one
     const emailResults = [];
     for (const subscriber of subscribers) {
       try {
+        console.log(`Sending email to ${subscriber.email}...`);
         const emailResult = await resend.emails.send({
           from: "Horalix <onboarding@resend.dev>",
           to: subscriber.email,
           subject: subject,
           html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">Hello ${subscriber.name}!</h2>
-              ${content}
-              <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
-                <p>You're receiving this email because you subscribed to our newsletter.</p>
-                <p>To unsubscribe, please contact support.</p>
-              </div>
-            </div>
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
+                  .content { padding: 20px; background-color: #f9f9f9; }
+                  .footer { text-align: center; padding: 20px; color: #666; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1>Hello ${subscriber.name}!</h1>
+                  </div>
+                  <div class="content">
+                    ${content}
+                  </div>
+                  <div class="footer">
+                    <p>You're receiving this email because you subscribed to our newsletter.</p>
+                    <p>To unsubscribe, please contact support.</p>
+                  </div>
+                </div>
+              </body>
+            </html>
           `,
         });
         
-        console.log(`Email sent successfully to ${subscriber.email}:`, emailResult);
+        console.log(`Email sent successfully to ${subscriber.email}`);
         emailResults.push({ email: subscriber.email, status: 'success', result: emailResult });
+        
+        // Add a delay between emails to prevent rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
         console.error(`Error sending email to ${subscriber.email}:`, error);
         emailResults.push({ email: subscriber.email, status: 'error', error: error.message });
       }
-      
-      // Add a small delay between emails to prevent rate limiting
-      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     const successCount = emailResults.filter(r => r.status === 'success').length;
@@ -98,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending campaign:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
