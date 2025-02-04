@@ -21,10 +21,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message, package: selectedPackage, subscribe }: ContactEmailRequest = await req.json();
 
-    // For testing, we'll send all emails to your verified email
-    const testEmail = "kerim.sabic@gmail.com";
+    // For testing, we'll send all admin notifications to your verified email
+    const adminEmail = "kerim.sabic@gmail.com";
 
-    // Send notification to owner
+    // Send notification to admin
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -33,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Horalix <support@horalix.com>",
-        to: [testEmail],
+        to: [adminEmail],
         subject: `Nova Poruka sa Kontakt Forme${selectedPackage ? ` - ${selectedPackage} Paket` : ''}`,
         html: `
           <!DOCTYPE html>
@@ -76,9 +76,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to send owner notification: ${await res.text()}`);
     }
 
-    console.log("Owner notification email sent:", await res.json());
+    console.log("Admin notification email sent:", await res.json());
 
-    // Send confirmation to sender
+    // Send confirmation to the actual user
     const senderRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Horalix <support@horalix.com>",
-        to: [testEmail],
+        to: [email], // Send to the actual user's email
         subject: "Hvala na poruci | Thank you for contacting Horalix",
         html: `
           <!DOCTYPE html>
@@ -130,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to send confirmation email: ${await senderRes.text()}`);
     }
 
-    console.log("Sender confirmation email sent:", await senderRes.json());
+    console.log("User confirmation email sent:", await senderRes.json());
 
     return new Response(
       JSON.stringify({ message: "Emails sent successfully" }),
