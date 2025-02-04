@@ -25,10 +25,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message, package: selectedPackage }: ContactEmailRequest = await req.json();
 
-    // Send notification email to both addresses
+    // First, send notification email to owner
     const ownerEmailResponse = await resend.emails.send({
       from: "Horalix Contact <onboarding@resend.dev>",
-      to: ["support@horalix.com", "kerimsabic69@gmail.com"], // Send to both addresses
+      to: ["support@horalix.com"],
       subject: `Nova Poruka sa Kontakt Forme${selectedPackage ? ` - ${selectedPackage} Paket` : ''}`,
       html: `
         <!DOCTYPE html>
@@ -65,7 +65,9 @@ const handler = async (req: Request): Promise<Response> => {
       reply_to: email
     });
 
-    // Send confirmation email to the sender
+    console.log("Owner notification email sent:", ownerEmailResponse);
+
+    // Then, send confirmation email to the sender
     const senderEmailResponse = await resend.emails.send({
       from: "Horalix <onboarding@resend.dev>",
       to: [email],
@@ -104,7 +106,6 @@ const handler = async (req: Request): Promise<Response> => {
       `
     });
 
-    console.log("Owner notification email sent:", ownerEmailResponse);
     console.log("Sender confirmation email sent:", senderEmailResponse);
 
     return new Response(JSON.stringify({ ownerEmailResponse, senderEmailResponse }), {
