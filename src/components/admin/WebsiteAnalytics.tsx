@@ -26,11 +26,14 @@ interface AnalyticsData {
 }
 
 async function fetchAnalytics(): Promise<AnalyticsData> {
-  // Get unique contacts count
-  const { count: contactCount } = await supabase
+  // Get unique contacts count by counting distinct emails
+  const { data: uniqueEmails } = await supabase
     .from('contact_submissions')
-    .select('email', { count: 'exact', head: true })
+    .select('email')
     .order('created_at', { ascending: false });
+
+  // Count unique emails
+  const uniqueEmailsCount = new Set(uniqueEmails?.map(submission => submission.email)).size;
 
   // Get unique visitors count (last 30 days)
   const thirtyDaysAgo = new Date();
@@ -57,7 +60,7 @@ async function fetchAnalytics(): Promise<AnalyticsData> {
       .gte('created_at', thirtyDaysAgo.toISOString()),
     supabase
       .from('contact_submissions')
-      .select('created_at')
+      .select('created_at, email')
       .gte('created_at', thirtyDaysAgo.toISOString())
   ]);
 
@@ -87,10 +90,20 @@ async function fetchAnalytics(): Promise<AnalyticsData> {
     }
   });
 
+  // Count unique contacts per day
+  const dailyUniqueContacts: Record<string, Set<string>> = {};
   dailyContacts?.forEach(contact => {
     const date = new Date(contact.created_at).toISOString().split('T')[0];
+    if (!dailyUniqueContacts[date]) {
+      dailyUniqueContacts[date] = new Set();
+    }
+    dailyUniqueContacts[date].add(contact.email);
+  });
+
+  // Update daily data with unique contact counts
+  Object.entries(dailyUniqueContacts).forEach(([date, emails]) => {
     if (dailyData[date]) {
-      dailyData[date].contacts = (dailyData[date].contacts || 0) + 1;
+      dailyData[date].contacts = emails.size;
     }
   });
 
@@ -112,7 +125,7 @@ async function fetchAnalytics(): Promise<AnalyticsData> {
   }));
 
   return {
-    uniqueContacts: contactCount || 0,
+    uniqueContacts: uniqueEmailsCount || 0,
     uniqueVisitors: uniqueVisitorCount || 0,
     totalSubscribers: subscriberCount || 0,
     timelineData,
