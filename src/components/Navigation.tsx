@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { LanguageSelector } from "./LanguageSelector";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +30,14 @@ export function Navigation() {
     }
   };
 
+  const navItems = [
+    ["features", t("nav.features")],
+    ["solutions", t("nav.solutions")],
+    ["pricing", t("nav.pricing")],
+    ["about", t("nav.about")],
+    ["contact", t("nav.contact")],
+  ];
+
   return (
     <nav
       className={cn(
@@ -46,13 +56,7 @@ export function Navigation() {
           </div>
           
           <div className="hidden md:flex items-center justify-center flex-1 space-x-12">
-            {[
-              ["features", "Features"],
-              ["solutions", "Solutions"],
-              ["pricing", "Pricing"],
-              ["about", "About"],
-              ["contact", "Contact"],
-            ].map(([id, label]) => (
+            {navItems.map(([id, label]) => (
               <button
                 key={id}
                 onClick={() => scrollToSection(id)}
@@ -71,7 +75,7 @@ export function Navigation() {
               className="premium-button group overflow-hidden"
             >
               <span className="relative z-10 group-hover:text-white transition-all duration-500 ease-in-out">
-                Get Started
+                {t("nav.get_started")}
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-medical-electric to-medical-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-in-out" />
             </button>

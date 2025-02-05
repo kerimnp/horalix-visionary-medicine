@@ -6,27 +6,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const languages = [
-  { code: "", name: "Bosanski", flag: "🇧🇦" },
   { code: "en", name: "English", flag: "🇬🇧" },
+  { code: "bs", name: "Bosanski", flag: "🇧🇦" },
   { code: "de", name: "Deutsch", flag: "🇩🇪" },
   { code: "ar", name: "العربية", flag: "🇸🇦" },
   { code: "tr", name: "Türkçe", flag: "🇹🇷" },
-];
+] as const;
 
 export function LanguageSelector() {
-  const navigate = useNavigate();
-  const currentPath = window.location.pathname;
-  const currentLangCode = currentPath.split('/')[1] || '';
-  
-  const handleLanguageChange = (langCode: string) => {
-    const newPath = langCode ? `/${langCode}` : '/';
-    navigate(newPath);
-  };
-
-  const currentLanguage = languages.find(lang => lang.code === currentLangCode) || languages[0];
+  const { currentLanguage, setLanguage } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -43,8 +34,10 @@ export function LanguageSelector() {
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}
-            onClick={() => handleLanguageChange(language.code)}
-            className="flex items-center gap-2.5 cursor-pointer py-2"
+            onClick={() => setLanguage(language.code)}
+            className={`flex items-center gap-2.5 cursor-pointer py-2 ${
+              currentLanguage === language.code ? 'bg-medical-electric/10' : ''
+            }`}
           >
             <span className="text-base">{language.flag}</span>
             <span className="text-sm font-medium text-medical-deep/80">
