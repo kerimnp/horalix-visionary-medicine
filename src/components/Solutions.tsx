@@ -1,24 +1,39 @@
 import { Activity, Brain, BarChart3 } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 export function Solutions() {
+  const { t } = useTranslation();
+
   const solutions = [
     {
       icon: Activity,
-      title: "Smart Patient Flow",
-      description: "Optimize hospital capacity and patient routing with real-time AI analysis",
-      features: ["Real-time capacity monitoring", "Intelligent patient routing", "Resource optimization"],
+      title: t("solutions.patient_flow.title"),
+      description: t("solutions.patient_flow.description"),
+      features: [
+        t("solutions.patient_flow.features.monitoring"),
+        t("solutions.patient_flow.features.routing"),
+        t("solutions.patient_flow.features.optimization"),
+      ],
     },
     {
       icon: Brain,
-      title: "AI Diagnostics Assistant",
-      description: "Enhanced diagnostic accuracy with advanced machine learning algorithms",
-      features: ["Image analysis", "Diagnostic suggestions", "Risk assessment"],
+      title: t("solutions.ai_diagnostics.title"),
+      description: t("solutions.ai_diagnostics.description"),
+      features: [
+        t("solutions.ai_diagnostics.features.analysis"),
+        t("solutions.ai_diagnostics.features.suggestions"),
+        t("solutions.ai_diagnostics.features.assessment"),
+      ],
     },
     {
       icon: BarChart3,
-      title: "Predictive Analytics",
-      description: "Data-driven insights for better healthcare decisions",
-      features: ["Trend forecasting", "Resource planning", "Performance metrics"],
+      title: t("solutions.predictive_analytics.title"),
+      description: t("solutions.predictive_analytics.description"),
+      features: [
+        t("solutions.predictive_analytics.features.forecasting"),
+        t("solutions.predictive_analytics.features.planning"),
+        t("solutions.predictive_analytics.features.metrics"),
+      ],
     },
   ];
 
@@ -26,10 +41,10 @@ export function Solutions() {
     <div className="container mx-auto px-6">
       <div className="text-center mb-16">
         <h2 className="text-4xl font-bold text-medical-deep mb-4">
-          Comprehensive Solutions
+          {t("solutions.section_title")}
         </h2>
         <p className="text-xl text-medical-deep/60">
-          Integrated AI solutions for modern healthcare
+          {t("solutions.section_description")}
         </p>
       </div>
 

@@ -1,21 +1,24 @@
 import { Brain, Shield, Cpu } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 export function About() {
+  const { t } = useTranslation();
+
   const stats = [
     {
       icon: Brain,
-      value: "Advanced",
-      label: "Neural Networks",
+      value: t("about.stats.neural_networks.value"),
+      label: t("about.stats.neural_networks.label"),
     },
     {
       icon: Cpu,
-      value: "Real-time",
-      label: "Processing Engine",
+      value: t("about.stats.processing_engine.value"),
+      label: t("about.stats.processing_engine.label"),
     },
     {
       icon: Shield,
-      value: "HIPAA",
-      label: "Compliant System",
+      value: t("about.stats.compliance.value"),
+      label: t("about.stats.compliance.label"),
     },
   ];
 
@@ -23,10 +26,10 @@ export function About() {
     <div className="container mx-auto px-6">
       <div className="text-center mb-16">
         <h2 className="text-4xl font-bold text-medical-deep mb-4">
-          About Horalix
+          {t("about.section_title")}
         </h2>
         <p className="text-xl text-medical-deep/60 max-w-2xl mx-auto">
-          Advancing healthcare through state-of-the-art artificial intelligence and machine learning technologies
+          {t("about.section_description")}
         </p>
       </div>
 
@@ -54,7 +57,7 @@ export function About() {
 
       <div className="mt-20 text-center">
         <p className="text-lg text-medical-deep/80 max-w-3xl mx-auto">
-          At Horalix, we're developing sophisticated artificial intelligence systems specifically designed for medical applications. Our proprietary neural networks and machine learning algorithms are built to process complex medical data with unprecedented accuracy. By leveraging cutting-edge technology and adhering to the highest security standards, we're creating a new paradigm in healthcare diagnostics and decision support systems.
+          {t("about.bottom_description")}
         </p>
       </div>
     </div>

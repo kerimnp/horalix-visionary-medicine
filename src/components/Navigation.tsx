@@ -55,7 +55,7 @@ export function Navigation() {
             />
           </div>
           
-          <div className="hidden md:flex items-center justify-center flex-1 space-x-12">
+          <div className="hidden md:flex items-center justify-center flex-1 space-x-16">
             {navItems.map(([id, label]) => (
               <button
                 key={id}
@@ -68,7 +68,7 @@ export function Navigation() {
             ))}
           </div>
           
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-8">
             <LanguageSelector />
             <button
               onClick={() => scrollToSection("pricing")}
