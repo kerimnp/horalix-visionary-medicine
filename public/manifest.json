@@ -1,7 +1,7 @@
 {
-  "name": "Horalix",
+  "name": "Horalix - AI Healthcare Technology",
   "short_name": "Horalix",
-  "description": "Vodeća AI Zdravstvena Tehnologija u Bosni",
+  "description": "Vodeća AI Zdravstvena Tehnologija u Bosni i Regionu",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,12 +10,14 @@
     {
       "src": "/lovable-uploads/6d6b96e8-9ce4-4052-82c9-f57f15af7920.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/lovable-uploads/6d6b96e8-9ce4-4052-82c9-f57f15af7920.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/lovable-uploads/6d6b96e8-9ce4-4052-82c9-f57f15af7920.png",
@@ -23,5 +25,16 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/lovable-uploads/6d6b96e8-9ce4-4052-82c9-f57f15af7920.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Horalix AI Healthcare Platform"
+    }
+  ],
+  "categories": ["medical", "healthcare", "artificial intelligence"],
+  "prefer_related_applications": false
 }
