@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { LanguageSelector } from "./LanguageSelector";
-import { useTranslation } from "@/contexts/TranslationContext";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,24 +16,17 @@ export function Navigation() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 100;
+      const offset = 100; // Increased offset for better spacing
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
 
       window.scrollTo({
         top: offsetPosition,
         behavior: "smooth",
+        // Adding a longer duration for smoother scrolling
       });
     }
   };
-
-  const navItems = [
-    ["features", t("nav.features")],
-    ["solutions", t("nav.solutions")],
-    ["pricing", t("nav.pricing")],
-    ["about", t("nav.about")],
-    ["contact", t("nav.contact")],
-  ];
 
   return (
     <nav
@@ -45,42 +35,41 @@ export function Navigation() {
         isScrolled ? "bg-white/90 backdrop-blur-xl shadow-lg" : "bg-transparent"
       )}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full">
-        <div className="flex items-center justify-between h-full">
-          <div className="flex-shrink-0">
-            <img 
-              src="/lovable-uploads/a4f68104-c835-4dc9-b7bb-3b985fbb8253.png" 
-              alt="Horalix Logo" 
-              className="h-8 md:h-10 w-auto animate-fade-in hover:scale-110 transition-all duration-500 ease-in-out"
-            />
-          </div>
-          
-          <div className="hidden md:flex items-center justify-center flex-1 space-x-16">
-            {navItems.map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => scrollToSection(id)}
-                className="text-medical-deep/80 hover:text-medical-deep transition-all duration-500 ease-in-out relative group px-2"
-              >
-                {label}
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-medical-electric transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-in-out" />
-              </button>
-            ))}
-          </div>
-          
-          <div className="flex items-center space-x-8">
-            <LanguageSelector />
-            <button
-              onClick={() => scrollToSection("pricing")}
-              className="premium-button group overflow-hidden"
-            >
-              <span className="relative z-10 group-hover:text-white transition-all duration-500 ease-in-out">
-                {t("nav.get_started")}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-medical-electric to-medical-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-in-out" />
-            </button>
-          </div>
+      <div className="container mx-auto px-6 h-full flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <img 
+            src="/lovable-uploads/a4f68104-c835-4dc9-b7bb-3b985fbb8253.png" 
+            alt="Horalix Logo" 
+            className="h-8 md:h-10 w-auto animate-fade-in hover:scale-110 transition-all duration-500 ease-in-out"
+          />
         </div>
+        <div className="hidden md:flex items-center space-x-8">
+          {[
+            ["features", "Features"],
+            ["solutions", "Solutions"],
+            ["pricing", "Pricing"],
+            ["about", "About"],
+            ["contact", "Contact"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => scrollToSection(id)}
+              className="text-medical-deep/80 hover:text-medical-deep transition-all duration-500 ease-in-out relative group"
+            >
+              {label}
+              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-medical-electric transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-in-out" />
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => scrollToSection("pricing")}
+          className="premium-button group overflow-hidden"
+        >
+          <span className="relative z-10 group-hover:text-white transition-all duration-500 ease-in-out">
+            Get Started
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-medical-electric to-medical-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-in-out" />
+        </button>
       </div>
     </nav>
   );

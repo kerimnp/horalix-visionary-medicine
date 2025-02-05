@@ -1,29 +1,26 @@
 import { Brain, Network, LineChart, Shield } from "lucide-react";
-import { useTranslation } from "@/contexts/TranslationContext";
 
 export function Features() {
-  const { t } = useTranslation();
-
   const features = [
     {
       icon: Brain,
-      title: t("features.ai_excellence.title"),
-      description: t("features.ai_excellence.description"),
+      title: "AI Excellence",
+      description: "Advanced AI algorithms driving medical decisions",
     },
     {
       icon: Network,
-      title: t("features.seamless_integration.title"),
-      description: t("features.seamless_integration.description"),
+      title: "Seamless Integration",
+      description: "Effortless integration with existing systems",
     },
     {
       icon: LineChart,
-      title: t("features.real_time_analytics.title"),
-      description: t("features.real_time_analytics.description"),
+      title: "Real-time Analytics",
+      description: "Live insights for informed decision-making",
     },
     {
       icon: Shield,
-      title: t("features.premium_support.title"),
-      description: t("features.premium_support.description"),
+      title: "Premium Support",
+      description: "24/7 dedicated expert assistance",
     },
   ];
 
@@ -31,10 +28,10 @@ export function Features() {
     <div className="container mx-auto px-6">
       <div className="text-center mb-16">
         <h2 className="text-4xl font-bold text-medical-deep mb-4">
-          {t("features.section_title")}
+          Transformative Features
         </h2>
         <p className="text-xl text-medical-deep/60">
-          {t("features.section_description")}
+          Discover the power of AI-driven healthcare solutions
         </p>
       </div>
       

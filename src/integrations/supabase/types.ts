@@ -144,33 +144,6 @@ export type Database = {
         }
         Relationships: []
       }
-      translations: {
-        Row: {
-          created_at: string
-          id: string
-          key: string
-          language: Database["public"]["Enums"]["supported_language"]
-          updated_at: string
-          value: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          key: string
-          language: Database["public"]["Enums"]["supported_language"]
-          updated_at?: string
-          value: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          key?: string
-          language?: Database["public"]["Enums"]["supported_language"]
-          updated_at?: string
-          value?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -209,7 +182,6 @@ export type Database = {
       }
     }
     Enums: {
-      supported_language: "bs" | "en" | "de" | "ar" | "tr"
       user_role:
         | "admin"
         | "healthcare_professional"

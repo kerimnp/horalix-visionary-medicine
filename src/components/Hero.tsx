@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { DemoModal } from "./DemoModal";
-import { useTranslation } from "@/contexts/TranslationContext";
 
 export function Hero() {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -51,15 +49,15 @@ export function Hero() {
         <div className="container mx-auto px-6 py-20">
           <div className="max-w-4xl mx-auto text-center">
             <span className="inline-block animate-fade-in opacity-0 [animation-delay:0.2s] px-4 py-1.5 mb-6 text-sm font-medium text-medical-electric bg-medical-electric/10 rounded-full">
-              {t("hero.leading_text")}
+              Leading Healthcare Innovation in Bosnia
             </span>
             
             <h1 className="animate-fade-up opacity-0 [animation-delay:0.4s] text-5xl md:text-7xl font-bold text-medical-deep mb-6">
-              {t("hero.title_1")}<br />{t("hero.title_2")}
+              AI-Powered<br />Medical Suite
             </h1>
             
             <p className="animate-fade-up opacity-0 [animation-delay:0.6s] text-xl text-medical-deep/60 mb-12">
-              {t("hero.description")}
+              Transform patient care with advanced AI diagnostics and real-time health monitoring
             </p>
             
             <div className="animate-fade-up opacity-0 [animation-delay:0.8s] flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -67,19 +65,19 @@ export function Hero() {
                 onClick={scrollToPricing} 
                 className="w-full sm:w-auto bg-medical-deep text-white px-8 py-3 rounded-lg hover:bg-medical-deep/90 transition-all duration-300"
               >
-                {t("hero.get_started")}
+                Get Started
               </button>
               <button 
                 onClick={handleTryDemo}
                 className="w-full sm:w-auto bg-medical-electric text-white px-8 py-3 rounded-lg hover:bg-medical-electric/90 transition-all duration-300 flex items-center justify-center gap-2"
               >
-                {t("hero.try_demo")} <ExternalLink className="w-4 h-4" />
+                Try Demo <ExternalLink className="w-4 h-4" />
               </button>
               <button 
                 onClick={handleLearnMore}
                 className="w-full sm:w-auto px-8 py-3 rounded-lg border-2 border-medical-deep/10 text-medical-deep hover:bg-medical-deep/5 transition-colors duration-300"
               >
-                {t("hero.learn_more")}
+                Learn More
               </button>
             </div>
           </div>
