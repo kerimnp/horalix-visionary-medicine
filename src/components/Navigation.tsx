@@ -45,7 +45,7 @@ export function Navigation() {
             />
           </div>
           
-          <div className="hidden md:flex items-center justify-center flex-1 space-x-8">
+          <div className="hidden md:flex items-center justify-center flex-1 space-x-12">
             {[
               ["features", "Features"],
               ["solutions", "Solutions"],
@@ -56,7 +56,7 @@ export function Navigation() {
               <button
                 key={id}
                 onClick={() => scrollToSection(id)}
-                className="text-medical-deep/80 hover:text-medical-deep transition-all duration-500 ease-in-out relative group"
+                className="text-medical-deep/80 hover:text-medical-deep transition-all duration-500 ease-in-out relative group px-2"
               >
                 {label}
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-medical-electric transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-in-out" />
@@ -64,7 +64,7 @@ export function Navigation() {
             ))}
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             <LanguageSelector />
             <button
               onClick={() => scrollToSection("pricing")}
