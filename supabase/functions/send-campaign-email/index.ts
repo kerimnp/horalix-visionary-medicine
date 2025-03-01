@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
@@ -10,6 +11,7 @@ const corsHeaders = {
 interface CampaignEmailRequest {
   subject: string;
   content: string;
+  replyTo?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -19,7 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log("Starting campaign email send process...");
-    const { subject, content }: CampaignEmailRequest = await req.json();
+    const { subject, content, replyTo = "support@horalix.com" }: CampaignEmailRequest = await req.json();
 
     // Initialize Supabase client
     const supabaseClient = createClient(
@@ -52,72 +54,127 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Send email to each subscriber
-    const emailPromises = subscribers.map(async (subscriber) => {
-      try {
-        console.log(`Sending campaign email to ${subscriber.email}...`);
-        
-        const res = await resend.emails.send({
-          from: "Horalix <support@horalix.com>",
-          to: [subscriber.email],
-          subject: subject,
-          html: `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <style>
-                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                  .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
-                  .content { padding: 20px; background-color: #f9f9f9; }
-                  .footer { text-align: center; padding: 20px; color: #666; }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <div class="header">
-                    <h1>Horalix Newsletter</h1>
-                  </div>
-                  <div class="content">
-                    ${content}
-                  </div>
-                  <div class="footer">
-                    <p>You're receiving this email because you subscribed to our newsletter.</p>
-                    <p>To unsubscribe, please contact support.</p>
-                  </div>
-                </div>
-              </body>
-            </html>
-          `,
-        });
+    // We'll process emails in batches to avoid rate limits
+    const batchSize = 20;
+    const batches = [];
+    
+    for (let i = 0; i < subscribers.length; i += batchSize) {
+      batches.push(subscribers.slice(i, i + batchSize));
+    }
+    
+    console.log(`Split ${subscribers.length} subscribers into ${batches.length} batches`);
+    
+    let successCount = 0;
+    let failureCount = 0;
+    const failedEmails = [];
 
-        if (!res.id) {
-          throw new Error(`Failed to send email to ${subscriber.email}`);
+    // Process each batch sequentially
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+      console.log(`Processing batch ${batchIndex + 1} of ${batches.length} (${batch.length} subscribers)`);
+      
+      // Send emails in the current batch concurrently
+      const emailPromises = batch.map(async (subscriber) => {
+        try {
+          console.log(`Sending campaign email to ${subscriber.email}...`);
+          
+          const res = await resend.emails.send({
+            from: "Horalix <support@horalix.com>",
+            reply_to: replyTo,
+            to: [subscriber.email],
+            subject: subject,
+            html: `
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
+                    .content { padding: 20px; background-color: #f9f9f9; }
+                    .footer { text-align: center; padding: 20px; color: #666; }
+                  </style>
+                </head>
+                <body>
+                  <div class="container">
+                    <div class="header">
+                      <h1>Horalix Newsletter</h1>
+                    </div>
+                    <div class="content">
+                      ${content}
+                    </div>
+                    <div class="footer">
+                      <p>You're receiving this email because you subscribed to our newsletter.</p>
+                      <p>To unsubscribe, please reply with "unsubscribe" in the subject line.</p>
+                    </div>
+                  </div>
+                </body>
+              </html>
+            `,
+          });
+
+          if (!res.id) {
+            throw new Error(`Failed to send email to ${subscriber.email}`);
+          }
+
+          console.log(`Successfully sent email to ${subscriber.email} with ID: ${res.id}`);
+          return { email: subscriber.email, status: 'success', id: res.id };
+        } catch (error) {
+          console.error(`Error sending to ${subscriber.email}:`, error);
+          failedEmails.push(subscriber.email);
+          return { email: subscriber.email, status: 'error', error: error.message };
         }
+      });
 
-        console.log(`Successfully sent email to ${subscriber.email} with ID: ${res.id}`);
-        return { email: subscriber.email, status: 'success', id: res.id };
-      } catch (error) {
-        console.error(`Error sending to ${subscriber.email}:`, error);
-        return { email: subscriber.email, status: 'error', error: error.message };
+      // Wait for all emails in this batch to be sent
+      const batchResults = await Promise.all(emailPromises);
+      
+      // Count successes and failures
+      batchResults.forEach(result => {
+        if (result.status === 'success') {
+          successCount++;
+        } else {
+          failureCount++;
+        }
+      });
+      
+      // Add a small delay between batches to avoid rate limits
+      if (batchIndex < batches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    });
+    }
 
-    // Wait for all emails to be sent
-    const results = await Promise.all(emailPromises);
-    console.log("Campaign email results:", results);
+    console.log(`Campaign sending completed: ${successCount} successes, ${failureCount} failures`);
 
-    // Check if any emails failed
-    const failures = results.filter(result => result.status === 'error');
-    if (failures.length > 0) {
-      console.error(`Failed to send ${failures.length} emails:`, failures);
-      throw new Error(`Failed to send ${failures.length} out of ${results.length} emails`);
+    // Log any failed emails for later retry
+    if (failedEmails.length > 0) {
+      console.error('Failed to send to these emails:', failedEmails);
+    }
+
+    // Return appropriate response based on results
+    if (failureCount > 0) {
+      if (successCount > 0) {
+        return new Response(
+          JSON.stringify({ 
+            message: `Campaign sent to ${successCount} subscribers with ${failureCount} failures`,
+            successCount,
+            failureCount,
+            totalAttempted: subscribers.length
+          }),
+          {
+            status: 207, // Partial success
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      } else {
+        throw new Error(`Failed to send any emails. Check logs for details.`);
+      }
     }
 
     return new Response(
       JSON.stringify({ 
-        message: `Campaign sent successfully to ${results.length} subscribers`,
-        results 
+        message: `Campaign sent successfully to all ${successCount} subscribers`,
+        successCount
       }),
       {
         status: 200,

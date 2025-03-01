@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -122,7 +123,8 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
             </body>
           </html>
-        `
+        `,
+        reply_to: "support@horalix.com"
       }),
     });
 

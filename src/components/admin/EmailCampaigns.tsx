@@ -1,29 +1,54 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function EmailCampaigns() {
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
+  const [replyTo, setReplyTo] = useState("support@horalix.com");
   const [isSending, setIsSending] = useState(false);
+  const [sendingProgress, setSendingProgress] = useState(0);
+  const [totalSubscribers, setTotalSubscribers] = useState(0);
 
   const handleSendCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!subject || !content) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!replyTo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) {
+      toast.error("Please enter a valid reply-to email address");
       return;
     }
 
     setIsSending(true);
+    setSendingProgress(0);
 
     try {
+      // First check total subscriber count
+      const { data: subscriberCount, error: countError } = await supabase
+        .from('subscribers')
+        .select('count')
+        .eq('status', 'active')
+        .single();
+      
+      if (countError) {
+        console.error('Error counting subscribers:', countError);
+        throw new Error('Failed to count subscribers');
+      }
+
+      setTotalSubscribers(subscriberCount.count);
+      
+      // Send the campaign
       const { data, error } = await supabase.functions.invoke('send-campaign-email', {
-        body: { subject, content }
+        body: { subject, content, replyTo }
       });
 
       if (error) {
@@ -43,6 +68,7 @@ export function EmailCampaigns() {
       toast.error(error.message || "Failed to send campaign. Please try again.");
     } finally {
       setIsSending(false);
+      setSendingProgress(0);
     }
   };
 
@@ -50,6 +76,7 @@ export function EmailCampaigns() {
     <div className="space-y-6">
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
         <div className="flex">
+          <AlertTriangle className="h-5 w-5 text-yellow-600" />
           <div className="ml-3">
             <p className="text-sm text-yellow-700">
               Emails will be sent to all active subscribers. Please use this feature responsibly.
@@ -73,6 +100,20 @@ export function EmailCampaigns() {
         </div>
 
         <div className="space-y-2">
+          <label htmlFor="replyTo" className="text-sm font-medium">
+            Reply-To Email
+          </label>
+          <Input
+            id="replyTo"
+            type="email"
+            value={replyTo}
+            onChange={(e) => setReplyTo(e.target.value)}
+            placeholder="Email address for replies..."
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
           <label htmlFor="content" className="text-sm font-medium">
             Email Content
           </label>
@@ -85,6 +126,18 @@ export function EmailCampaigns() {
             required
           />
         </div>
+
+        {isSending && totalSubscribers > 0 && (
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full" 
+              style={{ width: `${(sendingProgress / totalSubscribers) * 100}%` }}
+            ></div>
+            <p className="text-xs text-center mt-1">
+              Sending: {sendingProgress} of {totalSubscribers} emails
+            </p>
+          </div>
+        )}
 
         <Button 
           type="submit" 
