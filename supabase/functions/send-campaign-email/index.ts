@@ -67,10 +67,13 @@ const handler = async (req: Request): Promise<Response> => {
       // Process each subscriber in the batch
       const batchPromises = batch.map(async (subscriber) => {
         try {
+          // IMPORTANT: Using a verified sending domain from Resend
+          // Using onboarding@resend.dev as the FROM address which is pre-verified
+          // Setting the reply-to header to the custom address
           const emailResponse = await resend.emails.send({
             from: `${fromName} <onboarding@resend.dev>`,
             to: [subscriber.email],
-            reply_to: replyTo,
+            reply_to: replyTo, // This is the correct property name for reply-to
             subject: subject,
             html: content,
           });

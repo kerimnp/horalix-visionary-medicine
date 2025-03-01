@@ -32,11 +32,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: name, email, or message");
     }
 
-    // Send notification to admin
+    // Send notification to admin - using a verified sending domain from Resend
+    // and properly setting the reply-to header
     const emailResponse = await resend.emails.send({
       from: "Horalix Contact Form <onboarding@resend.dev>",
-      to: ["support@horalix.com"], // Change this to your admin email
-      reply_to: email, // Set reply-to as the contact's email
+      to: ["admin@example.com"], // Replace with your actual admin email
+      reply_to: email, // Setting reply-to as the contact's email
       subject: `New Contact Form Submission${packageName ? ` - ${packageName} Package` : ''}`,
       html: `
         <h1>New Contact Form Submission</h1>

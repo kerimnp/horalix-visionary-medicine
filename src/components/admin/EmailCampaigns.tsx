@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function EmailCampaigns() {
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
-  const [replyTo, setReplyTo] = useState("support@horalix.com");
+  const [replyTo, setReplyTo] = useState("onboarding@resend.dev");
   const [fromName, setFromName] = useState("Horalix Support");
   const [isSending, setIsSending] = useState(false);
   const [sendingProgress, setSendingProgress] = useState(0);
@@ -27,6 +27,14 @@ export function EmailCampaigns() {
     if (!replyTo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) {
       toast.error("Please enter a valid reply-to email address");
       return;
+    }
+
+    // Check if using a non-verified domain and warn the user
+    if (!replyTo.includes("resend.dev") && !replyTo.includes("gmail.com")) {
+      const confirmed = window.confirm(
+        "Important: You're using a custom domain for Reply-To. Make sure this domain is verified with Resend.com or replies will bounce. Continue?"
+      );
+      if (!confirmed) return;
     }
 
     setIsSending(true);
@@ -91,6 +99,26 @@ export function EmailCampaigns() {
         </div>
       </div>
 
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+        <div className="flex">
+          <Info className="h-5 w-5 text-blue-600" />
+          <div className="ml-3">
+            <p className="text-sm text-blue-700">
+              <strong>Important:</strong> For Reply-To emails to work properly, your domain (e.g., horalix.com) must be verified with Resend.com. 
+              Until verification is complete, use onboarding@resend.dev for testing.
+            </p>
+            <a 
+              href="https://resend.com/domains" 
+              target="_blank"
+              rel="noopener noreferrer" 
+              className="text-sm text-blue-600 hover:underline mt-1 inline-block"
+            >
+              Verify your domain →
+            </a>
+          </div>
+        </div>
+      </div>
+
       <form onSubmit={handleSendCampaign} className="space-y-6">
         <div className="space-y-2">
           <label htmlFor="subject" className="text-sm font-medium">
@@ -120,7 +148,7 @@ export function EmailCampaigns() {
 
         <div className="space-y-2">
           <label htmlFor="replyTo" className="text-sm font-medium">
-            Reply-To Email (Must be a verified domain)
+            Reply-To Email
           </label>
           <Input
             id="replyTo"
@@ -131,7 +159,7 @@ export function EmailCampaigns() {
             required
           />
           <p className="text-xs text-gray-500">
-            Important: This email must exist on a verified domain to receive replies. Otherwise, replies will bounce.
+            <strong>Domain verification required:</strong> For custom domains (like @horalix.com), you must verify domain ownership in Resend.com. Until then, use onboarding@resend.dev.
           </p>
         </div>
 
