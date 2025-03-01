@@ -11,6 +11,7 @@ export function EmailCampaigns() {
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
   const [replyTo, setReplyTo] = useState("support@horalix.com");
+  const [fromName, setFromName] = useState("Horalix Support");
   const [isSending, setIsSending] = useState(false);
   const [sendingProgress, setSendingProgress] = useState(0);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
@@ -48,7 +49,12 @@ export function EmailCampaigns() {
       
       // Send the campaign
       const { data, error } = await supabase.functions.invoke('send-campaign-email', {
-        body: { subject, content, replyTo }
+        body: { 
+          subject, 
+          content, 
+          replyTo,
+          fromName 
+        }
       });
 
       if (error) {
@@ -100,8 +106,21 @@ export function EmailCampaigns() {
         </div>
 
         <div className="space-y-2">
+          <label htmlFor="fromName" className="text-sm font-medium">
+            From Name
+          </label>
+          <Input
+            id="fromName"
+            value={fromName}
+            onChange={(e) => setFromName(e.target.value)}
+            placeholder="Sender's name (e.g., Horalix Support)..."
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
           <label htmlFor="replyTo" className="text-sm font-medium">
-            Reply-To Email
+            Reply-To Email (Must be a verified domain)
           </label>
           <Input
             id="replyTo"
@@ -111,6 +130,9 @@ export function EmailCampaigns() {
             placeholder="Email address for replies..."
             required
           />
+          <p className="text-xs text-gray-500">
+            Important: This email must exist on a verified domain to receive replies. Otherwise, replies will bounce.
+          </p>
         </div>
 
         <div className="space-y-2">

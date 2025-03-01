@@ -1,35 +1,37 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
-interface CampaignEmailRequest {
+interface EmailRequest {
   subject: string;
   content: string;
-  replyTo?: string;
+  replyTo: string;
+  fromName: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("Starting campaign email send process...");
-    const { subject, content, replyTo = "support@horalix.com" }: CampaignEmailRequest = await req.json();
+    const { subject, content, replyTo, fromName = "Horalix Support" }: EmailRequest = await req.json();
 
-    // Initialize Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Basic validation
+    if (!subject || !content || !replyTo) {
+      throw new Error("Missing required fields: subject, content, or replyTo");
+    }
 
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    const supabaseClient = await getSupabaseClient();
 
     // Fetch all active subscribers
     const { data: subscribers, error: fetchError } = await supabaseClient
@@ -38,11 +40,9 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('status', 'active');
 
     if (fetchError) {
-      console.error('Error fetching subscribers:', fetchError);
-      throw new Error(`Failed to fetch subscribers: ${fetchError.message}`);
+      console.error("Error fetching subscribers:", fetchError);
+      throw new Error("Failed to fetch subscribers");
     }
-
-    console.log(`Found ${subscribers?.length ?? 0} active subscribers`);
 
     if (!subscribers || subscribers.length === 0) {
       return new Response(
@@ -54,146 +54,78 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // We'll process emails in batches to avoid rate limits
-    const batchSize = 20;
-    const batches = [];
-    
-    for (let i = 0; i < subscribers.length; i += batchSize) {
-      batches.push(subscribers.slice(i, i + batchSize));
-    }
-    
-    console.log(`Split ${subscribers.length} subscribers into ${batches.length} batches`);
-    
-    let successCount = 0;
-    let failureCount = 0;
-    const failedEmails = [];
+    console.log(`Sending campaign to ${subscribers.length} subscribers`);
 
-    // Process each batch sequentially
-    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-      const batch = batches[batchIndex];
-      console.log(`Processing batch ${batchIndex + 1} of ${batches.length} (${batch.length} subscribers)`);
+    // Process subscribers in batches to avoid rate limits
+    const batchSize = 10;
+    const results = [];
+    const failures = [];
+
+    for (let i = 0; i < subscribers.length; i += batchSize) {
+      const batch = subscribers.slice(i, i + batchSize);
       
-      // Send emails in the current batch concurrently
-      const emailPromises = batch.map(async (subscriber) => {
+      // Process each subscriber in the batch
+      const batchPromises = batch.map(async (subscriber) => {
         try {
-          console.log(`Sending campaign email to ${subscriber.email}...`);
-          
-          const res = await resend.emails.send({
-            from: "Horalix <support@horalix.com>",
-            reply_to: replyTo,
+          const emailResponse = await resend.emails.send({
+            from: `${fromName} <onboarding@resend.dev>`,
             to: [subscriber.email],
+            reply_to: replyTo,
             subject: subject,
-            html: `
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background-color: #0A2540; color: white; padding: 20px; text-align: center; }
-                    .content { padding: 20px; background-color: #f9f9f9; }
-                    .footer { text-align: center; padding: 20px; color: #666; }
-                  </style>
-                </head>
-                <body>
-                  <div class="container">
-                    <div class="header">
-                      <h1>Horalix Newsletter</h1>
-                    </div>
-                    <div class="content">
-                      ${content}
-                    </div>
-                    <div class="footer">
-                      <p>You're receiving this email because you subscribed to our newsletter.</p>
-                      <p>To unsubscribe, please reply with "unsubscribe" in the subject line.</p>
-                    </div>
-                  </div>
-                </body>
-              </html>
-            `,
+            html: content,
           });
 
-          if (!res.id) {
-            throw new Error(`Failed to send email to ${subscriber.email}`);
-          }
-
-          console.log(`Successfully sent email to ${subscriber.email} with ID: ${res.id}`);
-          return { email: subscriber.email, status: 'success', id: res.id };
+          console.log(`Email sent to ${subscriber.email}:`, emailResponse);
+          return { success: true, email: subscriber.email, id: emailResponse.id };
         } catch (error) {
-          console.error(`Error sending to ${subscriber.email}:`, error);
-          failedEmails.push(subscriber.email);
-          return { email: subscriber.email, status: 'error', error: error.message };
+          console.error(`Failed to send to ${subscriber.email}:`, error);
+          failures.push({ email: subscriber.email, error: error.message });
+          return { success: false, email: subscriber.email, error: error.message };
         }
       });
 
-      // Wait for all emails in this batch to be sent
-      const batchResults = await Promise.all(emailPromises);
-      
-      // Count successes and failures
-      batchResults.forEach(result => {
-        if (result.status === 'success') {
-          successCount++;
-        } else {
-          failureCount++;
-        }
-      });
-      
-      // Add a small delay between batches to avoid rate limits
-      if (batchIndex < batches.length - 1) {
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults);
+
+      // Introduce a small delay between batches to avoid rate limits
+      if (i + batchSize < subscribers.length) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
 
-    console.log(`Campaign sending completed: ${successCount} successes, ${failureCount} failures`);
-
-    // Log any failed emails for later retry
-    if (failedEmails.length > 0) {
-      console.error('Failed to send to these emails:', failedEmails);
-    }
-
-    // Return appropriate response based on results
-    if (failureCount > 0) {
-      if (successCount > 0) {
-        return new Response(
-          JSON.stringify({ 
-            message: `Campaign sent to ${successCount} subscribers with ${failureCount} failures`,
-            successCount,
-            failureCount,
-            totalAttempted: subscribers.length
-          }),
-          {
-            status: 207, // Partial success
-            headers: { "Content-Type": "application/json", ...corsHeaders },
-          }
-        );
-      } else {
-        throw new Error(`Failed to send any emails. Check logs for details.`);
-      }
-    }
-
+    const successCount = results.filter(r => r.success).length;
+    
     return new Response(
-      JSON.stringify({ 
-        message: `Campaign sent successfully to all ${successCount} subscribers`,
-        successCount
+      JSON.stringify({
+        message: `Campaign sent to ${successCount} of ${subscribers.length} subscribers`,
+        failureCount: failures.length,
+        failures: failures.length > 0 ? failures : undefined
       }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
+
   } catch (error) {
-    console.error("Error in campaign sending:", error);
+    console.error("Error in send-campaign-email function:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to send campaign emails",
-        details: "Check the function logs for more information"
-      }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
   }
+};
+
+// Helper function to get Supabase client
+const getSupabaseClient = async () => {
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  
+  return createClient(supabaseUrl, supabaseKey);
 };
 
 serve(handler);

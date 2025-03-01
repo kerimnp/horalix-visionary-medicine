@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -33,6 +34,11 @@ export function Contact() {
     
     if (!formData.name || !formData.email || !formData.message) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error("Please enter a valid email address");
       return;
     }
 
